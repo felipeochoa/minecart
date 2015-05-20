@@ -29,21 +29,11 @@ class GraphicsObject(object):
                 and top <= bbox[3])
 
 
-class GraphicsCollection(object):
+class GraphicsCollection(list):
 
     """
     A collection of several graphics objects.
     """
-
-    def __init__(self):
-        self._items = []
-
-    def append(self, lettering):
-        "Add the given lettering to the collection."
-        self._items.append(lettering)
-
-    def __iter__(self):
-        return iter(self._items)
 
     def iter_in_bbox(self, bbox):
         """
