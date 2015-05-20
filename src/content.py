@@ -3,6 +3,7 @@ This module contains the objects representing graphics elements in a document.
 """
 
 import pdfminer.utils
+import sys
 
 
 class GraphicsObject(object):
@@ -46,6 +47,60 @@ class GraphicsCollection(list):
             if shape.check_inside_bbox(bbox):
                 yield shape
 
+def b_spline_bbox(point_0, point_1, point_2, point_3):
+    "Calculates a bounding box for the given spline segment."
+    # Code translated from http://stackoverflow.com/questions/2587751/
+    # It is based on calculating the first derivative of the bspline, and
+    # finding all the extrema of the parametrized form, and taking the
+    # bounding box of that
+    #pylint: disable=C0103
+    t_values = [0, 1]
+    for i in (0, 1):  # Does x values first then y values
+        # The following are the coefficients of the spline's derivative
+        a = -3 * point_0[i] + 9 * point_1[i] - 9 * point_2[i] + 3 * point_3[i]
+        b = 6 * point_0[i] - 12 * point_1[i] + 6 * point_2[i]
+        c = 3 * point_1[i] - 3 * point_0[i]
+        if abs(a) < sys.float_info.min:  # Numerical robustness checks
+            if abs(b) < sys.float_info.min:
+                # The spline is linear in this coordinate (or a single
+                # point), just need to check the two endpoints
+                continue
+            # The spline is quadratic with a single extremum:
+            t = -c / b
+            if 0 < t < 1:
+                t_values.append(t)
+                continue
+        b2ac = b * b - 4 * c * a
+        if b2ac < 0:
+            continue
+        sqrtb2ac = b2ac ** .5
+        t1 = (-b + sqrtb2ac) / (2 * a)
+        if 0 < t1 < 1:
+            t_values.append(t1)
+        t2 = (-b - sqrtb2ac) / (2 * a)
+        if 0 < t2 < 1:
+            t_values.append(t2)
+
+    x0, y0 = point_0[0]
+    x1, y1 = point_1[0]
+    x2, y2 = point_2[0]
+    x3, y3 = point_3[0]
+    x_bounds = []
+    y_bounds = []
+    for t in t_values:
+        mt = 1 - t
+        x = (mt ** 3 * x0
+             + 3 * mt ** 2 * t * x1
+             + 3 * mt * t ** 2 * x2
+             + t ** 3 * x3)
+        y = (mt ** 3 * y0
+             + 3 * mt ** 2 * t * y1
+             + 3 * mt * t ** 2 * y2
+             + t ** 3 * y3)
+        x_bounds.append(x)
+        y_bounds.append(y)
+    return min(x_bounds), min(y_bounds), max(x_bounds), max(y_bounds)
+
 
 class Shape(GraphicsObject):
 
@@ -82,7 +137,7 @@ class Shape(GraphicsObject):
         self._bbox = None
 
     def get_bbox(self):
-        "Returns a (not-necessarily minimal) bounding box for the curve."
+        "Returns a minimal bounding box for the curve."
         if self._bbox is None:
             cur_path = []
             points = []
@@ -92,11 +147,22 @@ class Shape(GraphicsObject):
                     if len(cur_path) > 1: # ignore repeated movetos
                         points.extend(cur_path)
                     cur_path = list(segment[1:])
-                elif kind in 'lcvy':
-                    # We treat curveto the same as lineto, which gives
-                    # loose but correct bounds
-                    # TODO: tighten bbox
+                elif kind == 'l':
                     cur_path.extend(segment[1:])
+                elif kind in 'cvy':
+                    if kind == 'c':
+                        spline = (cur_path[-1], segment[1:3],
+                                  segment[3:5], segment[5:7])
+                    elif kind == 'v':
+                        spline = (cur_path[-1], cur_path[-1],
+                                  segment[1:3], segment[3:5])
+                    elif kind == 'y':
+                        spline = (cur_path[-1], segment[1:3],
+                                  segment[3:5], segment[3:5])
+                    # We replace the curve by a zig-zag line through the
+                    # corners of the curve's bounding box
+                    cur_path.extend(b_spline_bbox(*spline))
+                    cur_path.extend(segment[5:7])
                 elif kind == 'h':
                     points.extend(cur_path)
                     cur_path = []
