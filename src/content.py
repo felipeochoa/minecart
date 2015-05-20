@@ -47,6 +47,11 @@ class GraphicsCollection(list):
             if shape.check_inside_bbox(bbox):
                 yield shape
 
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__,
+                               ", ".join(repr(item) for item in self))
+
+
 def b_spline_bbox(point_0, point_1, point_2, point_3):
     "Calculates a bounding box for the given spline segment."
     # Code translated from http://stackoverflow.com/questions/2587751/
@@ -218,6 +223,9 @@ class Lettering(unicode, GraphicsObject):
 
     def get_bbox(self):
         return self.bbox
+
+    def __repr__(self):
+        return "<%s: %s %r>" % (self.__class__.__name__, self, self.bbox)
 
 
 class Page(object):
