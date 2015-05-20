@@ -98,7 +98,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
                         vec[hv] += wordspace
                     needcharspace = True
                     string.append(font.to_unichr(cid))
-                self.page.add_string(content.Lettering(
+                self.page.add_lettering(content.Lettering(
                     u''.join(string), self.str_container.bbox, hv == 0))
                 self.str_container = None
         return tuple(vec)
