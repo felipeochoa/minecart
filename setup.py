@@ -18,6 +18,9 @@ setup(
     ],
     keywords='pdf pdfminer extract mining',
     install_requires=['pdfminer'],
+    extras_require={
+        'PIL': ['Pillow'],
+    }
     packages=["minecart"],
     package_dir={'minecart': 'src'}
 )

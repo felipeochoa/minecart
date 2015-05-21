@@ -2,9 +2,15 @@ u"""
 This module contains the objects representing graphics elements in a document.
 """
 
+from __future__ import division
+
+import pdfminer.pdftypes
 import pdfminer.utils
+import io
 import sys
 
+from pdfminer.psparser import LIT
+JPEG_FILTERS = (LIT('DCTDecode'), LIT('DCT'), LIT('JPXDecode'))
 
 class GraphicsObject(object):
 
@@ -207,6 +213,76 @@ class Image(GraphicsObject):
 
     def get_bbox(self):
         return self.bbox
+
+    def as_pil(self):
+        """
+        Return the image data in a `PIL.Image` object.
+
+        Requires `pillow` to be installed.
+
+        """
+        import PIL.Image
+        try:
+            image_data = self.obj.get_data()
+        except pdfminer.pdftypes.PDFNotImplementedError:
+            filters = self.obj.get_filters()
+            if len(filters) == 1 and filters[0] in JPEG_FILTERS:
+                # FIXME: ColorSpace in JPEG2000 should be overridden by the
+                # ColorSpace in the Image dictionary
+                image_data = io.BytesIO(self.obj.rawdata)
+                return PIL.Image.open(image_data)
+            raise  # We either can't handle the predictor or the filter
+
+        lti = pdfminer.layout.LTImage("", self.obj, self.get_bbox())
+        if (lti.bits in (1, 32) and lti.colorspace not in ('CalGray',
+                                                           'DeviceGray')):
+            raise pdfminer.pdftypes.PDFNotImplementedError(
+                "1/32-bit color only supported for CalGray or DeviceGray")
+        elif lti.bits not in (1, 8, 32):
+            raise pdfminer.pdftypes.PDFNotImplementedError(
+                "Only 1, 8 or 32 bit color supported")
+
+        if lti.bits == 1:
+            mode = '1'
+        elif lti.bits == 32:
+            mode = "I"
+        elif lti.colorspace in ('CalGray', 'DeviceGray'):
+            mode = 'L'
+        elif lti.colorspace in ('DeviceRGB', 'CalRGB', 'RGB'):
+            mode = "RGB"
+        elif lti.colorspace in ('DeviceCMYK', 'CMYK'):
+            mode = "CMYK"
+        else:
+            raise pdfminer.pdftypes.PDFNotImplementedError(
+                "Colorspace %r is not supported" % lti.colorspace)
+
+        image = PIL.Image.frombytes(mode, lti.srcsize, image_data, "bit",
+                                    lti.bits, 8, 0, 1)
+        # Explanation of the weird args:
+        #   8: The PDF spec mandates that "each row of sample data must begin
+        #      on a bytes boundary. If the number of data bits per row is not
+        #      a multiple of 8, the end of the row is padded with extra bits
+        #      to fill out the last byte." (p. 336 of PDF 1.7)
+        #   0: Per the PDF spec: "Sample data is represented as a stream of
+        #      bytes, interpreted as 8-bit unsigned integers in the range 0
+        #      to 255. The bytes constitute a continuous bit stream, with the
+        #      high-order bit of each byte first." Per the Pillow docs fill=0
+        #      means, "Add bytes to the LSB end of the decoder buffer; store
+        #      pixels from the MSB end."
+        #   1: 1 means that "the first line in the image is the top line on
+        #      the screen" (Pillow). The PDF spec (p. 337-338) mandates that
+        #      the top line come first.
+        if lti.bits == 1:
+            # The mapping will not have any effect
+            return image
+        decode_array = pdfminer.pdftypes.resolve1(self.obj['Decode'])
+        top = 2 ** lti.bits
+        lookup = []
+        for d_min, d_max in zip(decode_array[::2], decode_array[1::2]):
+            lookup.extend(int((d_min + x * (d_max - d_min) / (top - 1)) * top)
+                          for x in xrange(top))
+        return image.points(lookup)
+
 
 class Lettering(unicode, GraphicsObject):
 
