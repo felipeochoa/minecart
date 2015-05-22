@@ -8,6 +8,7 @@ import pdfminer.pdfdocument
 import pdfminer.pdfinterp
 import pdfminer.pdfpage
 import pdfminer.pdfparser
+import pdfminer.pdftypes
 import pdfminer.utils
 
 from . import content
@@ -23,14 +24,30 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         super(DeviceLoader, self).__init__(*args, **kwargs)
         self.page = None
         self.str_container = None
+        self.unit = 1
 
     def __repr__(self):
         return object.__repr__(self)
 
     def begin_page(self, page, ctm):
         self.page = content.Page()
+        self.unit = pdfminer.pdftypes.resolve1(page.attrs.get('UserUnit', 1))
+
+    def set_ctm(self, ctm):
+        # pdfminer adjusts the ctm for the page rotation and MediaBox,
+        # so we just need to adjust for the UserUnit
+        self.ctm = tuple(c * self.unit for c in ctm)
 
     def paint_path(self, graphicstate, stroke, fill, evenodd, path):
+        # Converts path to device coordinates and adds the path to the page
+        device_path = []
+        for segment in path:
+            coords = iter(segment[1:])
+            for x in coords:  #pylint: disable=C0103
+                y = next(coords)  #pylint: disable=C0103
+                device_path.append(
+                    (segment[0],)
+                    + pdfminer.utils.apply_matrix_pt(self.ctm, (x, y)))
         self.page.add_shape(content.Shape(stroke, fill, evenodd, path))
 
     def render_image(self, name, stream):

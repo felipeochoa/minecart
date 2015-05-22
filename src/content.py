@@ -317,6 +317,10 @@ class Page(object):
     * `shapes` -- a `GraphicsCollection` with all the `Shape` objects on the
                   page
 
+    The coordinate system for all of these graphics elements has as its
+    origin the lower-left corner of the page, and the units are DTP points
+    (1/72 inch).
+
     """
 
     def __init__(self):
