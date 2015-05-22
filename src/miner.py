@@ -30,7 +30,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         return object.__repr__(self)
 
     def begin_page(self, page, ctm):
-        self.page = content.Page()
+        self.page = content.Page(page)
         self.unit = pdfminer.pdftypes.resolve1(page.attrs.get('UserUnit', 1))
 
     def set_ctm(self, ctm):

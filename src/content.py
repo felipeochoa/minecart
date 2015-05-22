@@ -1,5 +1,19 @@
 u"""
-This module contains the objects representing graphics elements in a document.
+This module contains the representions graphics elements in a document.
+
+The three types of graphics elements supported are `Image`, `Shape`, and
+`Lettering`.
+
+Some notes on the coordinates used here:
+
+The PDF spec deals with many different coordinate systems and transforms, and
+converting from one to another is nontrivial and involves lots of matrices
+and transforms. To keep things simple, minecart defines its own coordinate
+system in which all metrics are expressed. This coordinate system has as its
+origin the bottom-left corner of the page, and has the positive x axis
+extending to the right and the positive y axis to the top. A unit on these
+axes corresponds to 1/72 of an inch.
+
 """
 
 from __future__ import division
@@ -308,7 +322,8 @@ class Page(object):
     """
     A page in the document, which contains all the graphics elements.
 
-    Has the following attributes:
+    Has the following attributes containing the various graphics elements on
+    the page:
 
     * `images` -- a `GraphicsCollection` with all the `Image` objects on the
                   page
@@ -321,12 +336,49 @@ class Page(object):
     origin the lower-left corner of the page, and the units are DTP points
     (1/72 inch).
 
+    The PDF standard defines several bounding boxes for each page, with a
+    loose hierarchy between them:
+
+    * MediaBox: Content outside of this box can be safely discarded. In our
+                coordinate system, the media box has coordinates
+                `(0, 0, page.width, page.height)`
+    * CropBox:  Sets a clipping area for the page contents. Accessed through
+                the `page.crop_box` attribute
+    * BleedBox: Accessed through the `page.bleed_box`, it "defines the region
+                to which the contents of the page should be clipped when
+                output in a production environment. This may include any
+                extra bleed area needed to accommodate the physical
+                limitations of cutting, folding, and trimming equipment. The
+                actual printed page may include printing marks that fall
+                outside the bleed box. The default value is the page's crop
+                box." (PDF spec 1.7 p. 963)
+    * TrimBox:  Accessed through the `page.trim_box`, it "defines the intended
+                dimensions of the finished page after trimming. It may be
+                smaller than the media box to allow for production-related
+                content, such as printing instructions, cut marks, or color
+                bars. The default value is the page's crop box." (PDF spec 1.7
+                p. 963)
+    * ArtBox:   Accessed through the `page.art_box`, it "defines the extent of
+                the page's meaningful content (including potential white space)
+                as intended by the page's creator. The default value is the
+                page's crop box." (PDF spec 1.7 p. 963)
+
     """
 
-    def __init__(self):
+    def __init__(self, m_page):
         self.images = GraphicsCollection()
         self.letterings = GraphicsCollection()
         self.shapes = GraphicsCollection()
+        unit = pdfminer.pdftypes.resolve1(m_page.attrs.get('UserUnit', 1))
+        self.width = (m_page.mediabox[2] - m_page.mediabox[0]) * unit
+        self.height = (m_page.mediabox[3] - m_page.mediabox[1]) * unit
+        self.crop_box = tuple(c * unit for c in m_page.cropbox)
+        self.bleed_box = tuple(c * unit for c in pdfminer.pdftypes.resolve1(
+            m_page.attrs.get('BleedBox', m_page.cropbox)))
+        self.trim_box = tuple(c * unit for c in pdfminer.pdftypes.resolve1(
+            m_page.attrs.get('TrimBox', m_page.cropbox)))
+        self.art_box = tuple(c * unit for c in pdfminer.pdftypes.resolve1(
+            m_page.attrs.get('ArtBox', m_page.cropbox)))
 
     def add_shape(self, shape):
         "Add the given shape to the page."
