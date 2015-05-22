@@ -119,8 +119,8 @@ class Shape(GraphicsObject):
     A Shape on a Page. Can be a path when stroked or filled.
 
     `graphicstate` --
-    `stroked` -- A boolean indicating whether the path is stroked
-    `filled` -- A boolean indicating whether the path is filled
+    `stroke` -- A boolean indicating whether the path is stroked
+    `fill` -- A boolean indicating whether the path is filled
     `evenodd` -- A boolean indicating whether to use the Even/Odd rule to
                  determine the path interior. If False, the Winding Number
                  Rule is used instead.
@@ -138,11 +138,10 @@ class Shape(GraphicsObject):
 
     """
 
-    def __init__(self, graphicstate, stroke, fill, evenodd, path):
+    def __init__(self, stroke, fill, evenodd, path):
         super(Shape, self).__init__()
-        self.graphicstate = graphicstate.copy()
-        self.stroked = stroke
-        self.filled = fill
+        self.stroke = stroke
+        self.fill = fill
         self.evenodd = evenodd
         self.path = path
         self._bbox = None

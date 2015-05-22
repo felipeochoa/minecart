@@ -31,8 +31,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         self.page = content.Page()
 
     def paint_path(self, graphicstate, stroke, fill, evenodd, path):
-        self.page.add_shape(content.Shape(graphicstate, stroke,
-                                          fill, evenodd, path))
+        self.page.add_shape(content.Shape(stroke, fill, evenodd, path))
 
     def render_image(self, name, stream):
         self.page.add_image(content.Image(self.ctm, stream))
