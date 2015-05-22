@@ -48,7 +48,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
                 device_path.append(
                     (segment[0],)
                     + pdfminer.utils.apply_matrix_pt(self.ctm, (x, y)))
-        self.page.add_shape(content.Shape(stroke, fill, evenodd, path))
+        self.page.add_shape(content.Shape(stroke, fill, evenodd, device_path))
 
     def render_image(self, name, stream):
         self.page.add_image(content.Image(self.ctm, stream))
