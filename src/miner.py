@@ -12,6 +12,169 @@ import pdfminer.pdftypes
 import pdfminer.utils
 
 from .content import Page, Shape, Image, Lettering
+from . import color
+
+class ColoredState(pdfminer.pdfinterp.PDFGraphicState):
+
+    """
+    Expands the graphic state with fill and stroke color parameters.
+    """
+
+    def __init__(self):
+        super(ColoredState, self).__init__()
+        self.fill_color = None
+        self.stroke_color = None
+
+
+class StrokeState(object):
+
+    """
+    An object that encapsulates the stroking parameters.
+    """
+
+    def __init__(self):
+        self.color = None
+        self.line_width = 2
+        self.line_cap = 0
+        self.line_join = 0
+        self.miter_limit = 10
+        self.dash_pattern = ([], 0)
+        self.stroke_adjustment = False
+
+    @classmethod
+    def from_gs(cls, graphics):
+        "Creates a new StrokeState from a ColoredState object."
+        ret = cls()
+        ret.color = graphics.stroke_color
+        ret.line_width = graphics.linewidth
+        ret.line_cap = graphics.linecap
+        ret.line_join = graphics.linejoin
+        ret.miter_limit = graphics.miterlimit
+        ret.dash_pattern = graphics.dash
+        return ret
+
+    def __repr__(self):
+        return ("<%s: color=%r, line-width=%r, line-cap=%r "
+                + "line-join=%r miter-limit=%r dash-pattern=%r>") %(
+                    self.__class__.__name__, self.color, self.line_width,
+                    self.line_cap, self.line_join, self.miter_limit,
+                    self.dash_pattern)
+
+
+class FillState(object):
+
+    """
+    An object that encapsulates the fill parameters.
+    """
+
+    def __init__(self):
+        self.color = None
+
+    @classmethod
+    def from_gs(cls, graphics):
+        "Creates a new FillState from a ColoredState object."
+        ret = cls()
+        ret.color = graphics.fill_color
+        return ret
+
+    def __repr__(self):
+        return ("<%s: color=%r>") % (self.__class__.__name__, self.color)
+
+
+class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
+
+    """
+    A PDF interpreter that can handle color commands.
+    """
+
+    def init_state(self, ctm):
+        # Extends the parent method to install our custom graphic state
+        super(ColoredInterpreter, self).init_state(ctm)
+        self.graphicstate = ColoredState()
+
+    def init_resources(self, resources):
+        # Extends the parent method to install our custom color spaces
+        if resources:
+            resources = pdfminer.pdftypes.dict_value(resources)
+            spaces = resources.pop('ColorSpace', {})
+        else:
+            spaces = {}
+        super(ColoredInterpreter, self).init_resources(resources)
+        self.csmap = {}
+        # Per the PDF spec, (p. 287), "The names DeviceGray, DeviceRGB,
+        # DeviceCMYK, and Pattern always identify the corresponding color
+        # spaces directly; they never refer to resources in the ColorSpace
+        # subdictionary." We implement this behavior by overriding any
+        # entries in the csmap with this name with the original color spaces.
+        for csname, spec in pdfminer.pdftypes.dict_value(spaces).iteritems():
+            if isinstance(spec, list):
+                name = pdfminer.psparser.literal_name(spec[0])
+                params = spec[1:]
+            else:
+                name = pdfminer.psparser.literal_name(spec)
+                params = []
+            self.csmap[csname] = color.FAMILIES[name].make_space(params)
+        self.csmap.update(
+            (name, color.FAMILIES[name].make_space())
+            for name in ('DeviceGray', 'DeviceRGB', 'DeviceCMYK')
+        )
+        # The next loop ensures that device color spaces are overriden by
+        # their defaults, if any
+        for csname, space in self.csmap.iteritems():
+            if csname in ('DefaultGray', 'DefaultRGB', 'DefaultCMYK'):
+                self.csmap[csname.replace('Default', 'Device')] = space
+
+    # setcolorspace-stroking
+    def do_CS(self, name):
+        super(ColoredInterpreter, self).do_CS(name)
+        # Because of the csmap we've defined, the
+
+    # setgray-stroking
+    def do_G(self, gray):
+        self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
+        self.graphicstate.stroke_color = self.scs.make_color((gray,))
+
+    # setgray-non-stroking
+    def do_g(self, gray):
+        self.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
+        self.graphicstate.fill_color = self.ncs.make_color((gray,))
+
+    # setrgb-stroking
+    def do_RG(self, r, g, b):
+        self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
+        self.graphicstate.stroke_color = self.scs.make_color((r, g, b))
+
+    # setrgb-non-stroking
+    def do_rg(self, r, g, b):
+        self.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
+        self.graphicstate.fill_color = self.ncs.make_color((r, g, b))
+
+    # setcmyk-stroking
+    def do_K(self, c, m, y, k):
+        self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
+        self.graphicstate.stroke_color = self.scs.make_color((c, m, y, k))
+
+    # setcmyk-non-stroking
+    def do_k(self, c, m, y, k):
+        self.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
+        self.graphicstate.fill_color = self.ncs.make_color((c, m, y, k))
+
+    # setcolor
+    def do_SCN(self):
+        if self.scs:
+            samples = self.scs.ncomponents
+        else:
+            raise pdfminer.pdfinterp.PDFInterpreterError(
+                'No colorspace specified!')
+        self.graphicstate.stroke_color = self.pop(samples)
+
+    def do_scn(self):
+        if self.ncs:
+            samples = self.ncs.ncomponents
+        else:
+            raise pdfminer.pdfinterp.PDFInterpreterError(
+                'No colorspace specified!')
+        self.graphicstate.fill_color = self.pop(samples)
 
 
 class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
@@ -38,7 +201,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         # so we just need to adjust for the UserUnit
         self.ctm = tuple(c * self.unit for c in ctm)
 
-    def paint_path(self, graphicstate, stroke, fill, evenodd, path):
+    def paint_path(self, graphicstate, stroked, filled, evenodd, path):
         # Converts path to device coordinates and adds the path to the page
         device_path = []
         for segment in path:
@@ -48,7 +211,9 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
                 device_path.append(
                     (segment[0],)
                     + pdfminer.utils.apply_matrix_pt(self.ctm, (x, y)))
-        self.page.add_shape(content.Shape(stroke, fill, evenodd, device_path))
+        stroke = StrokeState.from_gs(graphicstate) if stroked else None
+        fill = FillState.from_gs(graphicstate) if filled else None
+        self.page.add_shape(Shape(stroke, fill, evenodd, device_path))
 
     def render_image(self, name, stream):
         self.page.add_image(Image(self.ctm, stream))
@@ -129,8 +294,7 @@ class Document(object):
     def __init__(self, pdffile):
         res_mgr = pdfminer.pdfinterp.PDFResourceManager()
         self.device = DeviceLoader(res_mgr)
-        self.interpreter = pdfminer.pdfinterp.PDFPageInterpreter(
-            res_mgr, self.device)
+        self.interpreter = ColoredInterpreter(res_mgr, self.device)
         self.parser = pdfminer.pdfparser.PDFParser(pdffile)
         self.doc = pdfminer.pdfdocument.PDFDocument(self.parser, caching=True)
 
