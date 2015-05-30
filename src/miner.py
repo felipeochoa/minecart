@@ -11,7 +11,7 @@ import pdfminer.pdfparser
 import pdfminer.pdftypes
 import pdfminer.utils
 
-from . import content
+from .content import Page, Shape, Image, Lettering
 
 
 class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
@@ -30,7 +30,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         return object.__repr__(self)
 
     def begin_page(self, page, ctm):
-        self.page = content.Page(page)
+        self.page = Page(page)
         self.unit = pdfminer.pdftypes.resolve1(page.attrs.get('UserUnit', 1))
 
     def set_ctm(self, ctm):
@@ -51,7 +51,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         self.page.add_shape(content.Shape(stroke, fill, evenodd, device_path))
 
     def render_image(self, name, stream):
-        self.page.add_image(content.Image(self.ctm, stream))
+        self.page.add_image(Image(self.ctm, stream))
 
     def render_string_horizontal(self, *args):
         return self.render_string_hv('horizontal', *args)
@@ -114,7 +114,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
                         vec[hv] += wordspace
                     needcharspace = True
                     string.append(font.to_unichr(cid))
-                self.page.add_lettering(content.Lettering(
+                self.page.add_lettering(Lettering(
                     u''.join(string), self.str_container.bbox, hv == 0))
                 self.str_container = None
         return tuple(vec)
