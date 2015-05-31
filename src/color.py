@@ -34,7 +34,7 @@ TODO:
 * ICCBased, Pattern, Separation, DeviceN colorspaces
 
 """
-#pylint: disable=W0142,R0903
+#pylint: disable=R0903
 
 import pdfminer.pdftypes
 
