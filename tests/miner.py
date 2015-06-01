@@ -152,6 +152,8 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         pop.return_value = (0.5,)
         self.interp.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
         self.interp.do_SCN()
+        self.assertIsInstance(self.interp.graphicstate.stroke_color,
+                              minecart.color.Color)
         self.assertEqual(self.interp.graphicstate.stroke_color.value,
                          (0.5,))
         pop.assert_called_once_with(self.interp, 1)
@@ -161,6 +163,8 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         pop.return_value = (0.5, .25, .125)
         self.interp.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
         self.interp.do_SCN()
+        self.assertIsInstance(self.interp.graphicstate.stroke_color,
+                              minecart.color.Color)
         self.assertEqual(self.interp.graphicstate.stroke_color.value,
                          (0.5, .25, .125))
         pop.assert_called_once_with(self.interp, 3)
@@ -170,6 +174,8 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         pop.return_value = (0.5, .25, .125, .0625)
         self.interp.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
         self.interp.do_SCN()
+        self.assertIsInstance(self.interp.graphicstate.stroke_color,
+                              minecart.color.Color)
         self.assertEqual(self.interp.graphicstate.stroke_color.value,
                          (0.5, .25, .125, .0625))
         pop.assert_called_once_with(self.interp, 4)
@@ -181,6 +187,8 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         pop.return_value = (0.5,)
         self.interp.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
         self.interp.do_scn()
+        self.assertIsInstance(self.interp.graphicstate.fill_color,
+                              minecart.color.Color)
         self.assertEqual(self.interp.graphicstate.fill_color.value,
                          (0.5,))
         pop.assert_called_once_with(self.interp, 1)
@@ -190,6 +198,8 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         pop.return_value = (0.5, .25, .125)
         self.interp.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
         self.interp.do_scn()
+        self.assertIsInstance(self.interp.graphicstate.fill_color,
+                              minecart.color.Color)
         self.assertEqual(self.interp.graphicstate.fill_color.value,
                          (0.5, .25, .125))
         pop.assert_called_once_with(self.interp, 3)
@@ -199,6 +209,8 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         pop.return_value = (0.5, .25, .125, .0625)
         self.interp.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
         self.interp.do_scn()
+        self.assertIsInstance(self.interp.graphicstate.fill_color,
+                              minecart.color.Color)
         self.assertEqual(self.interp.graphicstate.fill_color.value,
                          (0.5, .25, .125, .0625))
         pop.assert_called_once_with(self.interp, 4)

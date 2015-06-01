@@ -177,7 +177,8 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         else:
             raise pdfminer.pdfinterp.PDFInterpreterError(
                 'No colorspace specified!')
-        self.graphicstate.stroke_color = self.pop(samples)
+        self.graphicstate.stroke_color = self.scs.make_color(
+            self.pop(samples))
 
     def do_scn(self):
         if self.ncs:
@@ -185,7 +186,7 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         else:
             raise pdfminer.pdfinterp.PDFInterpreterError(
                 'No colorspace specified!')
-        self.graphicstate.fill_color = self.pop(samples)
+        self.graphicstate.fill_color = self.ncs.make_color(self.pop(samples))
 
 
 class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
