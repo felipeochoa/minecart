@@ -135,11 +135,6 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
             else:
                 self.csmap[csname.replace('Default', 'Device')] = space
 
-    # setcolorspace-stroking
-    def do_CS(self, name):
-        super(ColoredInterpreter, self).do_CS(name)
-        # Because of the csmap we've defined, the
-
     # setgray-stroking
     def do_G(self, gray):
         self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
