@@ -34,11 +34,11 @@ class StrokeState(object):
 
     def __init__(self):
         self.color = None
-        self.line_width = 2
-        self.line_cap = 0
-        self.line_join = 0
-        self.miter_limit = 10
-        self.dash_pattern = ([], 0)
+        self.linewidth = 2
+        self.linecap = 0
+        self.linejoin = 0
+        self.miterlimit = 10
+        self.dash = ([], 0)
         self.stroke_adjustment = False
 
     @classmethod
@@ -46,19 +46,19 @@ class StrokeState(object):
         "Creates a new StrokeState from a ColoredState object."
         ret = cls()
         ret.color = graphics.stroke_color
-        ret.line_width = graphics.linewidth
-        ret.line_cap = graphics.linecap
-        ret.line_join = graphics.linejoin
-        ret.miter_limit = graphics.miterlimit
-        ret.dash_pattern = graphics.dash
+        ret.linewidth = graphics.linewidth
+        ret.linecap = graphics.linecap
+        ret.linejoin = graphics.linejoin
+        ret.miterlimit = graphics.miterlimit
+        ret.dash = graphics.dash
         return ret
 
     def __repr__(self):
         return ("<%s: color=%r, line-width=%r, line-cap=%r "
                 + "line-join=%r miter-limit=%r dash-pattern=%r>") %(
-                    self.__class__.__name__, self.color, self.line_width,
-                    self.line_cap, self.line_join, self.miter_limit,
-                    self.dash_pattern)
+                    self.__class__.__name__, self.color, self.linewidth,
+                    self.linecap, self.linejoin, self.miterlimit,
+                    self.dash)
 
 
 class FillState(object):
