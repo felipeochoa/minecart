@@ -87,6 +87,13 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
     A PDF interpreter that can handle color commands.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(ColoredInterpreter, self).__init__(*args, **kwargs)
+        # This is here to allow for independent testing of init_state and
+        # init_resources, as well as to avoid pylint warnings ;)
+        self.csmap = {}
+        self.graphicstate = None
+
     def init_state(self, ctm):
         # Extends the parent method to install our custom graphic state
         super(ColoredInterpreter, self).init_state(ctm)
@@ -100,7 +107,7 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         else:
             spaces = {}
         super(ColoredInterpreter, self).init_resources(resources)
-        self.csmap = {}
+        self.csmap.clear()
         # Per the PDF spec, (p. 287), "The names DeviceGray, DeviceRGB,
         # DeviceCMYK, and Pattern always identify the corresponding color
         # spaces directly; they never refer to resources in the ColorSpace
