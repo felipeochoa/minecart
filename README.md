@@ -11,13 +11,14 @@ inspiration from Tim McNamara's
 provide access to the images and shapes found in the document, in a
 very simple, Pythonic way. E.g.:
 
-    >>> pdffile = open('example.pdf', 'rb')
-    >>> doc = minecart.Document(pdffile)
-    >>> page = doc.get_page(3)
-    >>> for shape in page.shapes:
-    ...     if shape.check_inside_bbox((0, 0, 100, 200)):
-    ...         print shape.path, shape.fill.color.as_rgb()
-
+```python
+>>> pdffile = open('example.pdf', 'rb')
+>>> doc = minecart.Document(pdffile)
+>>> page = doc.get_page(3)
+>>> for shape in page.shapes:
+...     if shape.check_inside_bbox((0, 0, 100, 200)):
+...         print shape.path, shape.fill.color.as_rgb()
+```
 
 Development status
 ---------------------
