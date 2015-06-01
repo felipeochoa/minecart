@@ -256,13 +256,13 @@ class CIESpace(ColorSpace):
         super(CIESpace, self).__init__(family,
                                        default=self.DEFAULT_COLOR_VALUE,
                                        ncomponents=self.NCOMPONENTS)
-        self.white_point = params['WhitePoint']
+        self.white_point = tuple(params['WhitePoint'])
         if self.white_point[0] <= 0 or self.white_point[2] <= 0:
             raise ValueError(
                 "The X and Z values of WhitePoint must be postive")
         if self.white_point[1] != 1:
             raise ValueError("The Y value of WhitePoint must be 1")
-        self.black_point = params.get('BlackPoint', (0, 0, 0))
+        self.black_point = tuple(params.get('BlackPoint', (0, 0, 0)))
         if min(self.black_point) < 0:
             raise ValueError("All components of BlackPoint must be >= 0")
 
@@ -284,6 +284,25 @@ class CIESpace(ColorSpace):
     def make_color(self, value=None):
         "Overrides parent method to use a CIEColor instead."
         return CIEColor(self, value)
+
+    def __eq__(self, other):
+        "Compare two spaces based on their parametrization."
+        default = object()
+        return (
+            self.family == other.family
+            and self.ncomponents == other.ncomponents
+            and self.default == other.default
+            and self.white_point == other.white_point
+            and self.black_point == other.black_point
+            and (getattr(self, 'gamma', default)
+                 == getattr(other, 'gamma', default))
+            and (getattr(self, 'matrix', default)
+                 == getattr(other, 'matrix', default))
+            and (getattr(self, 'a_range', default)
+                 == getattr(other, 'a_range', default))
+            and (getattr(self, 'b_range', default)
+                 == getattr(other, 'b_range', default))
+        )
 
 
 class CalGraySpace(CIESpace):
