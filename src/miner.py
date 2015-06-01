@@ -127,8 +127,12 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         )
         # The next loop ensures that device color spaces are overriden by
         # their defaults, if any
-        for csname, space in self.csmap.iteritems():
-            if csname in ('DefaultGray', 'DefaultRGB', 'DefaultCMYK'):
+        for csname in ('DefaultGray', 'DefaultRGB', 'DefaultCMYK'):
+            try:
+                space = self.csmap[csname]
+            except KeyError:
+                pass
+            else:
                 self.csmap[csname.replace('Default', 'Device')] = space
 
     # setcolorspace-stroking
