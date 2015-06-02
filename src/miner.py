@@ -141,6 +141,7 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         # subdictionary." We implement this behavior by overriding any
         # entries in the csmap with this name with the original color spaces.
         for csname, spec in pdfminer.pdftypes.dict_value(spaces).iteritems():
+            spec = pdfminer.pdftypes.resolve_all(spec)
             if isinstance(spec, list):
                 name = pdfminer.psparser.literal_name(spec[0])
                 params = spec[1:]
