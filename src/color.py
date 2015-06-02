@@ -470,3 +470,24 @@ class IndexedSpace(ColorSpace):
         )
 
 FAMILIES['Indexed'] = ColorSpaceFamily('Indexed', IndexedSpace)
+
+############################################################################
+#      Stub implementations ICCBased, Pattern, Separation, and DeviceN     #
+############################################################################
+
+class StubColorSpaceFamily(ColorSpaceFamily):
+
+    "A stub implementation with only a number of components."
+
+
+    def __init__(self, name, ncomponents):
+        super(StubColorSpaceFamily, self).__init__(name, None)
+        self.ncomponents = ncomponents
+
+    def make_space(self, params=None):
+        # Overrides supermethod to discard params and create generic
+        # colorspace
+        return ColorSpace(self, self.ncomponents, (0,) * self.ncomponents)
+
+for name, ncomps in [('Pattern', 1), ('Separation', 1)]:
+    FAMILIES[name] = StubColorSpaceFamily(name, ncomps)
