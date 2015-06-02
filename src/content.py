@@ -94,8 +94,8 @@ def b_spline_bbox(point_0, point_1, point_2, point_3):
             t = -c / b
             if 0 < t < 1:
                 t_values.append(t)
-                continue
-        b2ac = b * b - 4 * c * a
+            continue
+        b2ac = b ** 2 - 4 * c * a
         if b2ac < 0:
             continue
         sqrtb2ac = b2ac ** .5
@@ -106,10 +106,10 @@ def b_spline_bbox(point_0, point_1, point_2, point_3):
         if 0 < t2 < 1:
             t_values.append(t2)
 
-    x0, y0 = point_0[0]
-    x1, y1 = point_1[0]
-    x2, y2 = point_2[0]
-    x3, y3 = point_3[0]
+    x0, y0 = point_0
+    x1, y1 = point_1
+    x2, y2 = point_2
+    x3, y3 = point_3
     x_bounds = []
     y_bounds = []
     for t in t_values:
@@ -175,13 +175,13 @@ class Shape(GraphicsObject):
                     cur_path.extend(segment[1:])
                 elif kind in 'cvy':
                     if kind == 'c':
-                        spline = (cur_path[-1], segment[1:3],
+                        spline = (cur_path[-2:], segment[1:3],
                                   segment[3:5], segment[5:7])
                     elif kind == 'v':
-                        spline = (cur_path[-1], cur_path[-1],
+                        spline = (cur_path[-2:], cur_path[-2:],
                                   segment[1:3], segment[3:5])
                     elif kind == 'y':
-                        spline = (cur_path[-1], segment[1:3],
+                        spline = (cur_path[-2:], segment[1:3],
                                   segment[3:5], segment[3:5])
                     # We replace the curve by a zig-zag line through the
                     # corners of the curve's bounding box
@@ -190,6 +190,7 @@ class Shape(GraphicsObject):
                 elif kind == 'h':
                     points.extend(cur_path)
                     cur_path = []
+            points.extend(cur_path)
             exes = points[::2]
             whys = points[1::2]
             self._bbox = (min(exes), min(whys), max(exes), max(whys))
