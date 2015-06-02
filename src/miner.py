@@ -241,11 +241,12 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         device_path = []
         for segment in path:
             coords = iter(segment[1:])
+            new_seg = [segment[0]]
             for x in coords:  #pylint: disable=C0103
                 y = next(coords)  #pylint: disable=C0103
-                device_path.append(
-                    (segment[0],)
-                    + pdfminer.utils.apply_matrix_pt(self.ctm, (x, y)))
+                new_seg.extend(pdfminer.utils.apply_matrix_pt(self.ctm,
+                                                              (x, y)))
+            device_path.append(tuple(new_seg))
         stroke = StrokeState.from_gs(graphicstate) if stroked else None
         fill = FillState.from_gs(graphicstate) if filled else None
         self.page.add_shape(Shape(stroke, fill, evenodd, device_path))
