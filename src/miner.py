@@ -205,8 +205,8 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
     An interpreter that creates `Page` objects.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(DeviceLoader, self).__init__(*args, **kwargs)
+    def __init__(self, rsrcmgr):
+        super(DeviceLoader, self).__init__(rsrcmgr)
         self.page = None
         self.str_container = None
         self.unit = 1
