@@ -25,6 +25,19 @@ class ColoredState(pdfminer.pdfinterp.PDFGraphicState):
         self.fill_color = None
         self.stroke_color = None
 
+    def copy(self):
+        obj = self.__class__()
+        obj.linewidth = self.linewidth
+        obj.linecap = self.linecap
+        obj.linejoin = self.linejoin
+        obj.miterlimit = self.miterlimit
+        obj.dash = self.dash
+        obj.intent = self.intent
+        obj.flatness = self.flatness
+        obj.fill_color = self.fill_color
+        obj.stroke_color = self.stroke_color
+        return obj
+
 
 class StrokeState(object):
 
