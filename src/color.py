@@ -208,11 +208,13 @@ class DeviceSpace(ColorSpace):
             1.0 - min(1, yellow + black)
         )
 
-
+DEVICE_GRAY = DeviceFamily('DeviceGray', (0,)).make_space()
+DEVICE_RGB = DeviceFamily('DeviceRGB', (0, 0, 0)).make_space()
+DEVICE_CMYK = DeviceFamily('DeviceCMYK', (0, 0, 0, 1)).make_space()
 FAMILIES.update({
-    'DeviceGray': DeviceFamily('DeviceGray', (0,)),
-    'DeviceRGB': DeviceFamily('DeviceRGB', (0, 0, 0)),
-    'DeviceCMYK': DeviceFamily('DeviceCMYK', (0, 0, 0, 1))
+    'DeviceGray': DEVICE_GRAY.family,
+    'DeviceRGB': DEVICE_RGB.family,
+    'DeviceCMYK': DEVICE_CMYK.family
 })
 
 
