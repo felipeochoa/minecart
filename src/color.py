@@ -155,6 +155,9 @@ class ColorSpaceFamily(object):
         return self.color_space_class(self, params)
 
 
+NO_COLOR = Color(ColorSpace(ColorSpaceFamily('NoneFamily', None), tuple()))
+
+
 ############################################################################
 #                    The device families and colorspaces                   #
 ############################################################################

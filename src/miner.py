@@ -22,8 +22,8 @@ class ColoredState(pdfminer.pdfinterp.PDFGraphicState):
 
     def __init__(self):
         super(ColoredState, self).__init__()
-        self.fill_color = None
-        self.stroke_color = None
+        self.fill_color = color.NO_COLOR    # Is there a better way to advise
+        self.stroke_color = color.NO_COLOR  # pylint that these are Colors?
 
     def copy(self):
         obj = self.__class__()
