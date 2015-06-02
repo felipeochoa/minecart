@@ -89,17 +89,17 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
 
     # The ColoredInterpreter extends the PDFPageInterpreter found in pdfminer
     # by keeping track of the stroke and fill colors. It keeps a `ColorSpace`
-    # class for both stroke and fill operations, and uses it to create
-    # `Color` objects for each of stroke and fill.
+    # for both stroke and fill operations, and uses it to create `Color`
+    # objects for each of stroke and fill.
     #
     # The ColoredInterpreter manages the current color spaces the same way
     # that the PDFPageInterpreter does (pdfminer needs to care about the
-    # number of components in the color space, so it has some thin version of
-    # 'color spaces'). To plug into the machinery, it overrides the setting
-    # of `self.csmap` in `self.init_resources()`. csmap is a dictionary
-    # mapping names as found in the /Resources dict of a page to instances of
-    # the colorspaces, initialized according to the parameters found in
-    # /Resources.
+    # number of components in the color space, so it has a thin version of
+    # color spaces already). To plug into this machinery, it overrides the
+    # setting of `self.csmap` in `self.init_resources()`. csmap is a
+    # dictionary mapping names as found in the /Resources dict of a page to
+    # instances of the colorspaces, initialized according to the parameters
+    # found in /Resources.
 
     def __init__(self, *args, **kwargs):
         super(ColoredInterpreter, self).__init__(*args, **kwargs)
@@ -247,7 +247,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         return self.render_string_hv('vertical', *args)
 
     def render_char(self, matrix, font, fontsize, scaling, rise, cid):
-        # Essentially copied from
+        # Essentials copied from
         # pdfminer.converter.PDFLayoutAnalyzer.render_char
         text = font.to_unichr(cid)
         textwidth = font.char_width(cid)
