@@ -21,6 +21,7 @@ from __future__ import division
 import pdfminer.pdftypes
 import pdfminer.utils
 import io
+import itertools
 import sys
 
 from pdfminer.psparser import LIT
@@ -30,7 +31,14 @@ class GraphicsObject(object):
 
     """
     An abstract base class for the graphical objects found on a page.
+
+    `z_index` -- the object's height in the stack. (Earliest drawn objects
+                 have lower z_indices).
+
     """
+
+    def __init__(self, z_index=0):
+        self.z_index = z_index
 
     def get_bbox(self):
         """
@@ -371,6 +379,7 @@ class Page(object):
         self.images = GraphicsCollection()
         self.letterings = GraphicsCollection()
         self.shapes = GraphicsCollection()
+        self.next_z_index = itertools.count(0)
         unit = pdfminer.pdftypes.resolve1(m_page.attrs.get('UserUnit', 1))
         self.width = (m_page.mediabox[2] - m_page.mediabox[0]) * unit
         self.height = (m_page.mediabox[3] - m_page.mediabox[1]) * unit
@@ -385,11 +394,14 @@ class Page(object):
     def add_shape(self, shape):
         "Add the given shape to the page."
         self.shapes.append(shape)
+        shape.z_index = next(self.next_z_index)
 
     def add_image(self, image):
         "Add the given image to the page."
         self.images.append(image)
+        image.z_index = next(self.next_z_index)
 
     def add_lettering(self, lettering):
         "Add the given lettering to the page."
         self.letterings.append(lettering)
+        lettering.z_index = next(self.next_z_index)
