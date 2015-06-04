@@ -313,12 +313,16 @@ class Lettering(unicode, GraphicsObject):
     A text string on a page, including its typographic information.
     """
 
-    def __new__(cls, data, bbox, horizontal=True):
+    def __new__(cls, data, font, bbox, horizontal=True):
         loc_str = unicode.__new__(cls, data)
         x1, y1, x2, y2 = bbox  #pylint: disable=C0103
         loc_str.bbox = (min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2))
         loc_str.horizontal = horizontal
+        loc_str.font = font
         return loc_str
+
+    def __init__(self, data, font, bbox, horizontal):
+        super(Lettering, self).__init__()
 
     def get_bbox(self):
         return self.bbox

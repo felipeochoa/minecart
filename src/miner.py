@@ -317,7 +317,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
                     needcharspace = True
                     string.append(font.to_unichr(cid))
                 self.page.add_lettering(Lettering(
-                    u''.join(string), self.str_container.bbox, hv == 0))
+                    u''.join(string), font, self.str_container.bbox, hv == 0))
                 self.str_container = None
         return tuple(vec)
 
