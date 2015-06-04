@@ -132,9 +132,10 @@ class Shape(GraphicsObject):
     """
     A Shape on a Page. Can be a path when stroked or filled.
 
-    `graphicstate` --
-    `stroke` -- A boolean indicating whether the path is stroked
-    `fill` -- A boolean indicating whether the path is filled
+    `stroke` -- A StrokeState with the stroke parameters if the shape is
+                stroked, otherwise None.
+    `fill` -- A FillState with the fill parameters if the shape is filled,
+              otherwise None.
     `evenodd` -- A boolean indicating whether to use the Even/Odd rule to
                  determine the path interior. If False, the Winding Number
                  Rule is used instead.
