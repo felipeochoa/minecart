@@ -383,13 +383,30 @@ class TestDeviceLoader(unittest.TestCase):
         render_string_hv.assert_called_once_with(self.device, 'vertical',
                                                  *args)
 
-    def test_x(self):
-        self.fail("Incomplete test coverage of the DeviceLoader class!")
+    def test_render_char(self):
+        self.fail("Not implemented")
+
+    def test_render_string_hv(self):
+        self.fail("Not implemented")
 
 
 class TestDocument(unittest.TestCase):
 
     "Test the Document class."
 
-    def test_x(self):
-        self.fail("No test coverage of the Document class!")
+    @mock.patch("pdfminer.pdfdocument.PDFDocument", autospec=True)
+    @mock.patch("pdfminer.pdfparser.PDFParser", autospec=True)
+    def test_init(self, pdfparser, pdfdocument):
+        "Test correct initializing of the Document object."
+        pdffile = object()
+        doc = minecart.miner.Document(pdffile)
+        pdfdocument.assert_called_once_with(doc.parser, caching=True)
+        pdfparser.assert_called_once_with(pdffile)
+
+    def test_iter_pages(self):
+        "Ensure iter_pages runs through all pages."
+        self.fail("Not implemented!")
+
+    def test_get_page(self):
+        ""
+        self.fail("Not implemented!")
