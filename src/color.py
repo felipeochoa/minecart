@@ -230,9 +230,9 @@ class CIEColor(Color):
     """
     A Color in a CIE-based color space.
 
-    `transform` -- A function that accepts a single argument (self.value)
-                   and returns a 3-tuple containing the XYZ values of this
-                   color.
+    It has an additional method `as_xyz()` that returns the XYZ values of the
+    color, in the range [0, 1].
+
     """
 
     __slots__ = []
