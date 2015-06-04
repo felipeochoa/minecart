@@ -340,10 +340,11 @@ class TestDeviceLoader(unittest.TestCase):
         gstate.miterlimit = .5
         gstate.dash = ([1, 1], 0)
         gstate.stroke_color = minecart.color.DEVICE_RGB.make_color((0, 1, 1))
+        gstate.fill_color = minecart.color.DEVICE_RGB.make_color((1, 0, 0))
         path = [('m', 10, 10), ('l', 20, 20), ('l', 30, 10), ('h',)]
         self.device.page = mock.MagicMock(spec_set=minecart.miner.Page)
         self.device.ctm = (1, 0, 0, 1, 0, 0)
-        self.device.paint_path(gstate, True, False, False, path)
+        self.device.paint_path(gstate, True, True, False, path)
         self.device.page.add_shape.assert_called_once()
         shape = self.device.page.add_shape.call_args[0][0]
         self.assertEqual(shape.stroke.linewidth, 5)
@@ -353,7 +354,34 @@ class TestDeviceLoader(unittest.TestCase):
         self.assertEqual(shape.stroke.dash, ([1, 1], 0))
         self.assertEqual(shape.stroke.color.value, (0, 1, 1))
         self.assertIs(shape.stroke.color.space, minecart.color.DEVICE_RGB)
-        self.assertIsNone(shape.fill)
+        self.assertEqual(shape.fill.color.value, (1, 0, 0))
+        self.assertEqual(shape.fill.color.space, minecart.color.DEVICE_RGB)
+
+    @mock.patch("minecart.miner.Image", autospec=True)
+    def test_render_image(self, image):
+        "Test the creation of an image."
+        self.device.ctm = object()
+        stream = object()
+        self.device.render_image(object(), stream)
+        image.assert_called_once_with(self.device.ctm, stream)
+
+    @mock.patch("minecart.miner.DeviceLoader.render_string_hv",
+                autospec=True)
+    def test_render_string_horizontal(self, render_string_hv):
+        args = ['seq', 'matrix', 'vec', 'font', 'fontsize', 'scaling',
+                'charspace', 'wordspace', 'rise', 'dxscale']
+        self.device.render_string_horizontal(*args)
+        render_string_hv.assert_called_once_with(self.device, 'horizontal',
+                                                 *args)
+
+    @mock.patch("minecart.miner.DeviceLoader.render_string_hv",
+                autospec=True)
+    def test_render_string_vertical(self, render_string_hv):
+        args = ['seq', 'matrix', 'vec', 'font', 'fontsize', 'scaling',
+                'charspace', 'wordspace', 'rise', 'dxscale']
+        self.device.render_string_vertical(*args)
+        render_string_hv.assert_called_once_with(self.device, 'vertical',
+                                                 *args)
 
     def test_x(self):
         self.fail("Incomplete test coverage of the DeviceLoader class!")
