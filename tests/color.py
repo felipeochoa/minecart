@@ -187,3 +187,73 @@ class TestDeviceSpaceCMYK(TestDeviceSpace):
     def test_as_rgb_subtractive(self):
         self.assertEqual((.25, .25, .25),
                          self.space.as_rgb((.75, .75, .75, 0)))
+
+
+class TestCIEColor(unittest.TestCase):
+
+    "Testing of the CIEColor class"
+
+    def test_as_xyz(self):
+        "Ensure the CIEColor as_xyz() calls the color space's method."
+        space = mock.MagicMock(spec_set=minecart.color.CIESpace)
+        color = minecart.color.CIEColor(space, object())
+        self.assertEqual(color.as_xyz(), space.as_xyz.return_value)
+        space.as_xyz.assert_called_once_with(color.value)
+
+
+class TestCIESpace(unittest.TestCase):
+
+    "Testing of the abstract CIESpace class."
+
+    def test_init_params(self):
+        "Ensure the initializing parameters are properly checked."
+        family = mock.MagicMock(spec_set=minecart.color.ColorSpaceFamily)
+        self.assertRaises(TypeError, minecart.color.CIESpace, family, [])
+        self.assertRaises(TypeError, minecart.color.CIESpace, family,
+                          ['a', 'b'])
+        self.assertRaises(TypeError, minecart.color.CIESpace, family,
+                          ['WhitePoint'])
+
+    def test_init_attrs(self):
+        "Ensure the initializer sets the white and black point attributes."
+        family = mock.MagicMock(spec_set=minecart.color.ColorSpaceFamily)
+        # First only white is specified, black should default to (0, 0, 0)
+        white = (.25, 1, .125)
+        space = minecart.color.CIESpace(family, [{'WhitePoint': white}])
+        self.assertEqual(white, space.white_point)
+        self.assertEqual((0, 0, 0), space.black_point)
+        # Now we specify both
+        white = (.125, 1, .25)
+        black = (0, .25, .125)
+        space = minecart.color.CIESpace(family, [{'WhitePoint': white,
+                                                  'BlackPoint': black}])
+        self.assertEqual(white, space.white_point)
+        self.assertEqual(black, space.black_point)
+        # Now we pass invalid values of white point
+        white = (-.25, 1, .125)
+        self.assertRaises(ValueError, minecart.color.CIESpace, family,
+                          [{'WhitePoint': white}])
+        white = (.25, 1, -.125)
+        self.assertRaises(ValueError, minecart.color.CIESpace, family,
+                          [{'WhitePoint': white}])
+        white = (.25, .95, .125)
+        self.assertRaises(ValueError, minecart.color.CIESpace, family,
+                          [{'WhitePoint': white}])
+        # And finally invalid values of black point
+        white = (.25, 1, .125)
+        black = (-1, 0, 0)
+        self.assertRaises(ValueError, minecart.color.CIESpace, family,
+                          [{'WhitePoint': white, 'BlackPoint': black}])
+        black = (0, -1, 0)
+        self.assertRaises(ValueError, minecart.color.CIESpace, family,
+                          [{'WhitePoint': white, 'BlackPoint': black}])
+        black = (0, 0, -1)
+        self.assertRaises(ValueError, minecart.color.CIESpace, family,
+                          [{'WhitePoint': white, 'BlackPoint': black}])
+
+    def test_make_color(self):
+        "Ensure make color uses CIEColor."
+        family = mock.MagicMock(spec_set=minecart.color.ColorSpaceFamily)
+        space = minecart.color.CIESpace(family,
+                                        [{'WhitePoint': (.01, 1, .01)}])
+        self.assertIsInstance(space.make_color([1]), minecart.color.CIEColor)
