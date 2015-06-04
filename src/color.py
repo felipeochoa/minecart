@@ -280,7 +280,8 @@ class CIESpace(ColorSpace):
         defining the color space.
 
         """
-        raise NotImplementedError
+        tester = lambda WhitePoint, **kwargs: None
+        tester(**params)
 
     def as_xyz(self, value):
         "Convert a given value into XYZ components."
