@@ -251,6 +251,26 @@ class TestCIESpace(unittest.TestCase):
         self.assertRaises(ValueError, minecart.color.CIESpace, family,
                           [{'WhitePoint': white, 'BlackPoint': black}])
 
+    def test_as_rgb(self):
+        "Test the conversion of XYZ values into sRGB values."
+        # These test values were obtained randomly from
+        # https://www.colorcodehex.com//
+        test_values = (
+            #    X       Y       Z         R       G      B
+            [(.19244, .10728, 0.04927), (.6902, .1373, .2235)],
+            [(.01171, .00922, 0.03731), (.0627, .0824, .2157)],
+            [(.62216, .72826, 1.05385), (.6431, .9098, 1)],
+            [(.04631, .07551, 0.01972), (.1686, .3451, .0863)],
+        )
+        minecart.color.CIESpace.as_xyz = lambda self, value: value
+        family = mock.MagicMock(spec_set=minecart.color.ColorSpaceFamily)
+        space = minecart.color.CIESpace(family,
+                                        [{'WhitePoint': (.01, 1, .01)}])
+        for xyz, rgb in test_values:
+            rgb_test = space.as_rgb(xyz)
+            for comp_a, comp_b in zip(rgb_test, rgb):
+                self.assertLessEqual(abs(comp_a - comp_b), .00006)
+
     def test_make_color(self):
         "Ensure make color uses CIEColor."
         family = mock.MagicMock(spec_set=minecart.color.ColorSpaceFamily)

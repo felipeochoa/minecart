@@ -287,6 +287,22 @@ class CIESpace(ColorSpace):
         "Convert a given value into XYZ components."
         raise NotImplementedError
 
+    def as_rgb(self, value):
+        "Converts the given value into sRGB components."
+        # See http://www.color.org/srgb.pdf for the transformation details
+        x, y, z = self.as_xyz(value)  #pylint: disable=C0103
+        linear = (
+            +3.2406 * x - 1.5372 * y - 0.4986 * z,
+            -0.9689 * x + 1.8758 * y + 0.0415 * z,
+            +0.0557 * x - 0.2040 * y + 1.0570 * z
+        )
+        return tuple(
+            comp * 12.92 if comp <= 0.0031308 else
+            1.055 * pow(comp, 1.0 / 2.4) - 0.055
+            for comp in (max(0, min(1, comp)) for comp in linear)
+        )
+
+
     def make_color(self, value=None):
         "Overrides parent method to use a CIEColor instead."
         return CIEColor(self, value)
