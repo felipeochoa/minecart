@@ -121,6 +121,110 @@ def loadfont_memory(data):
                                              ctypes.byref(num))
     return num.value
 
+def get_font_program(font_dict):
+    """
+    Extracts the font program from a PDF font dictionary.
+
+    Returns a tuple (family_name, font_program_data, attrs), where
+    family_name is the unicode name of the family that can be passed to
+    `tkFont.Font` to create the font. `font_program_data` is the raw binary
+    data of the embedded font, if any, that can be passed to
+    `loadfont_memory` to load the font into the central repository, or `None`
+    if the font isn't emebedded. `attrs` is a dictionary of kwargs that can
+    be passed to `tkFont.Font`.
+
+    """
+    subtype = str(pdfminer.pdftypes.resolve1(font_dict['Subtype']))
+    if subtype == '/Type1':
+        return get_type1_font(font_dict)
+    elif subtype == '/TrueType':
+        return get_truetype_font(font_dict)
+    elif subtype == '/Type0':
+        return get_type0_font(font_dict)
+    elif subtype == '/Type3':
+        raise pdfminer.pdftypes.PDFNotImplementedError(
+            "Type 3 Fonts are not supported by this viewer")
+    elif subtype == '/MMType1':
+        raise pdfminer.pdftypes.PDFNotImplementedError(
+            "Multiple Master Fonts are not supported by this viewer")
+    raise pdfminer.pdftypes.PDFValueError(
+        "Unknown font subtype: '%s'" % subtype)
+
+def extract_font_stream(font_dict, file_names):
+    """
+    Try to extract the embedded font program data from a font_dict.
+
+    Returns (stream, data) or (None, None) if there is no embedded font.
+
+    file_names is a sequence of keys to try looking in under the font
+    descriptor. (E.g., ('/FontFile2', '/FontFile3') for TrueType fonts)
+
+    """
+    desc = pdfminer.pdftypes.resolve1(font_dict['FontDescriptor'])
+    for name in file_names:
+        try:
+            stream = desc[name]
+        except KeyError:
+            pass
+        else:
+            stream = pdfminer.pdftypes.resolve1(stream)
+            return stream, stream.get_data()
+    return None, None
+
+def get_type1_font(font_dict):
+    # Convert base name to regular string without the leading backslash
+    base_name = str(pdfminer.pdftypes.resolve1(font_dict.get('BaseFont')))[1:]
+    if base_name in ('Times-Roman', 'Times-Bold', 'Times-Italic',
+                     'Times-BoldItalic', 'Helvetica', 'Helvetica-Bold',
+                     'Helvetica-Oblique', 'Helvetica-BoldOblique',
+                     'Courier', 'Courier-Bold', 'Courier-Oblique',
+                     'Courier-BoldOblique'):
+        root_name = base_name.split("-", 1)[0]
+        args = {}
+        if 'Bold' in base_name:
+            args['weight'] = 'bold'
+        if 'Italic' in base_name or 'Oblique' in base_name:
+            args['slant'] = 'italic'
+        return root_name, None, args
+    elif base_name in ('Symbol', 'ZapfDingbats'):
+        raise pdfminer.pdftypes.PDFNotImplementedError(
+            "The '%s' builtin font is not supported by this viewer." %
+            base_name)
+    if (base_name[6] == '+'
+        and set(base_name[:6]) < set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')):
+        base_name = base_name[7:]
+    data = extract_font_stream(font_dict, ('FontFile', 'FontFile3'))[1]
+    return base_name, data, {}
+
+def get_truetype_font(font_dict):
+    base_name = str(pdfminer.pdftypes.resolve1(font_dict.get('BaseFont')))[1:]
+    if (base_name[6] == '+'
+        and set(base_name[:6]) < set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')):
+        base_name = base_name[7:]
+    args = {}
+    if ',' in base_name:
+        base_name, attrs = base_name.split(',', 1)
+        if 'Bold' in attrs:
+            args['weight'] = 'bold'
+        if 'Italic' in attrs:
+            args['slant'] = 'italic'
+    data = extract_font_stream(font_dict, ('FontFile2', 'FontFile3'))[1]
+    return base_name, data, args
+
+def get_type0_font(font_dict):
+    subfont = pdfminer.pdftypes.resolve1(font_dict['DescendantFonts'])[0]
+    subfont = pdfminer.pdftypes.resolve1(subfont)
+    subtype = str(pdfminer.pdftypes.resolve1(subfont['Subtype']))
+    if subtype == '/CIDFontType0':
+        name, data, args = get_type1_font(subfont)
+
+    elif subtype == '/CIDFontType2':
+        return get_truetype_font(subfont)
+    else:
+        raise pdfminer.pdftypes.PDFValueError(
+            "Unknown subtype of CID font: '%s'" % subtype)
+
+
 
 class TkPage(ScrollingCanvas):
 
@@ -227,28 +331,14 @@ class TkPage(ScrollingCanvas):
     def get_font(self, m_font, size):
         "Return a font matching the given specs, loading it if necessary."
         try:
-            return self.font_cache[m_font]
+            family, attrs = self.font_cache[m_font]
         except KeyError:
-            pass
-        try:
-            stream = m_font.descriptor['FontFile']
-            subtype = ""
-        except KeyError:
-            try:
-                stream = m_font.descriptor['FontFile2']
-                subtype = ""
-            except KeyError:
-                stream = m_font.descriptor['FontFile3']
-                subtype = m_font.descriptor['Subtype']
-        data = pdfminer.pdftypes.stream_value(stream).get_data()
-        family = pdfminer.pdftypes.resolve1(m_font.descriptor['FontName'])
-        weight = pdfminer.pdftypes.resolve1(m_font.descriptor.get('FontWeight',
-                                                                400))
-        weight = 'normal' if weight < 450 else 'bold'
-        slant = pdfminer.pdftypes.resolve1(m_font.descriptor['ItalicAngle'])
-        slant = 'roman' if slant == 0 else 'italic'
-        loadfont_memory(data)
-        font = tkFont.Font(family=family, size=-int(size * self.res + .5),
-                           weight=weight, slant=slant)
-        self.font_cache[m_font] = font
-        return font
+            family, data, attrs = get_font_program(m_font)
+            self.font_cache[m_font] = family, attrs
+            loadfont_memory(data)
+        desc = pdfminer.pdftypes.resolve1(m_font.descriptor)
+        if 'FontWeight' in desc:
+            attrs['weight'] = 'normal' if desc['FontWeight'] < 450 else 'bold'
+        if 'ItalicAngle' in desc:
+            attrs['slant'] = 'roman' if desc['ItalicAngle'] ==0 else 'italic'
+        return tkFont.Font(family=family, size=-int(size * self.res), **attrs)
