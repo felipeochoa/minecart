@@ -130,8 +130,10 @@ class TkPage(ScrollingCanvas):
 
     def __init__(self, master, page, zoom=1, **kwargs):
         self.res = zoom * master.winfo_fpixels('1i') / 72.0  # pixels per point
-        kwargs['width'] = page.width * self.res
-        kwargs['height'] = page.height * self.res
+        if 'width' not in kwargs:
+            kwargs['width'] = page.width * self.res
+        if 'height' not in kwargs:
+            kwargs['height'] = page.height * self.res
         kwargs['scrollregion'] = (0, 0, kwargs['width'], kwargs['height'])
         super(TkPage, self).__init__(master, **kwargs)
         self.page = page  # A minecart.Page object
