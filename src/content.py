@@ -380,6 +380,7 @@ class Page(object):
     """
 
     def __init__(self, m_page):
+        self.m_page = m_page
         self.images = GraphicsCollection()
         self.letterings = GraphicsCollection()
         self.shapes = GraphicsCollection()
@@ -387,13 +388,40 @@ class Page(object):
         unit = pdfminer.pdftypes.resolve1(m_page.attrs.get('UserUnit', 1))
         self.width = (m_page.mediabox[2] - m_page.mediabox[0]) * unit
         self.height = (m_page.mediabox[3] - m_page.mediabox[1]) * unit
-        self.crop_box = tuple(c * unit for c in m_page.cropbox)
-        self.bleed_box = tuple(c * unit for c in pdfminer.pdftypes.resolve1(
-            m_page.attrs.get('BleedBox', m_page.cropbox)))
-        self.trim_box = tuple(c * unit for c in pdfminer.pdftypes.resolve1(
-            m_page.attrs.get('TrimBox', m_page.cropbox)))
-        self.art_box = tuple(c * unit for c in pdfminer.pdftypes.resolve1(
-            m_page.attrs.get('ArtBox', m_page.cropbox)))
+        if m_page.rotate in (90, 270):
+            self.height, self.width = self.width, self.height
+        self.crop_box = self.adjust_box(m_page.cropbox, m_page.rotate, unit)
+        try:
+            self.bleed_box = self.adjust_box(
+                pdfminer.pdftypes.resolve1(m_page.attrs['BleedBox']))
+        except KeyError:
+            self.bleed_box = self.crop_box
+        try:
+            self.trim_box = self.adjust_box(
+                pdfminer.pdftypes.resolve1(m_page.attrs['TrimBox']))
+        except KeyError:
+            self.trim_box = self.crop_box
+        try:
+            self.art_box = self.adjust_box(
+                pdfminer.pdftypes.resolve1(m_page.attrs['ArtBox']))
+        except KeyError:
+            self.art_box = self.crop_box
+
+    def adjust_box(self, box):
+        "Translate and rotate the given box to device coordinates."
+        mb_left, mb_bot = self.m_page.mediabox[:2]
+        left, bot, right, top = box
+        left -= mb_left
+        right -= mb_left
+        bot -= mb_bot
+        top -= mb_bot
+        if self.m_page.rotate == 90:
+            left, bot, right, top = bot, -right, top, -left
+        elif self.m_page.rotate == 180:
+            left, bot, right, top = -left, -bot, -right, -top
+        elif self.m_page.rotate == 270:
+            left, bot, right, top = -top, left, -bot, right
+        return (left, bot, right, top)
 
     def add_shape(self, shape):
         "Add the given shape to the page."
