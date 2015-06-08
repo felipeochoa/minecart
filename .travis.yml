@@ -14,5 +14,5 @@ env:
   - TRAVIS=1
 
 script:
-  - coverage run --source . -m unittest discover tests
+  - coverage run --source minecart -m unittest discover tests
   - coveralls
