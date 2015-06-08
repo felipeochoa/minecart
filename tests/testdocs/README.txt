@@ -2,8 +2,11 @@
 # They are sourced from the following places:
 
 
+* laundry.pdf: This is an image from a project I did a few years
+  ago. The PDF was created using pdflatex (with the graphicx package)
+  and contains an embedded PNG (/FlateDecode) image.
 
-* orientation.pdf: Popller unittests. Poppler files are subject to the
+* orientation.pdf: Poppler unittests. Poppler files are subject to the
   GPL, hence not included in this repository. You can find them at
   http://cgit.freedesktop.org/poppler/test/tree/unittestcases
 
