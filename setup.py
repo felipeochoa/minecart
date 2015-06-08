@@ -23,5 +23,4 @@ setup(
         'PIL': ['Pillow'],
     },
     packages=["minecart"],
-    package_dir={'minecart': 'src'}
 )
