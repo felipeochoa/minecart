@@ -6,6 +6,7 @@ python:
 install:
   - pip install --upgrade pip
   - pip install -e .[PIL]
+  - python setup.py install
 
 bundler_args: --retry 3
 
