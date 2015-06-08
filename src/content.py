@@ -27,6 +27,7 @@ import sys
 from pdfminer.psparser import LIT
 JPEG_FILTERS = (LIT('DCTDecode'), LIT('DCT'), LIT('JPXDecode'))
 
+
 class GraphicsObject(object):
 
     """
@@ -257,54 +258,104 @@ class Image(GraphicsObject):
             raise  # We either can't handle the predictor or the filter
 
         lti = pdfminer.layout.LTImage("", self.obj, self.get_bbox())
-        if (lti.bits in (1, 32) and lti.colorspace not in ('CalGray',
-                                                           'DeviceGray')):
-            raise pdfminer.pdftypes.PDFNotImplementedError(
-                "1/32-bit color only supported for CalGray or DeviceGray")
-        elif lti.bits not in (1, 8, 32):
-            raise pdfminer.pdftypes.PDFNotImplementedError(
-                "Only 1, 8 or 32 bit color supported")
-
-        if lti.bits == 1:
-            mode = '1'
-        elif lti.bits == 32:
-            mode = "I"
-        elif lti.colorspace in ('CalGray', 'DeviceGray'):
-            mode = 'L'
-        elif lti.colorspace in ('DeviceRGB', 'CalRGB', 'RGB'):
+        # The PDF spec allows non-JPEG images to have 1, 2, 4, 8 or 16 bits
+        if isinstance(lti.colorspace, list):
+            colorspace = str(lti.colorspace[0])[1:]  # strip leading /
+        else:
+            colorspace = str(lti.colorspace)[1:]  # strip leading /
+        if colorspace in ('DeviceRGB', 'CalRGB', 'RGB'):
             mode = "RGB"
-        elif lti.colorspace in ('DeviceCMYK', 'CMYK'):
+            samples = 3
+            if lti.bits == 8:
+                rawmode = "RGB"
+            elif lti.bits == 16:
+                rawmode = "RGB;16B"
+            # elif lti.bits in (1, 2, 4):
+            #     # We have to upcast our data to 8 bits from either 1, 2, or 4
+            #     # bits:
+            #     #  4-bit:
+            #     #    RRRR GGGG BBBB -> RRRR 0000 GGGG 0000 BBBB 0000
+            #     #  2-bit:
+            #     #    RR GG BB -> RR 000000 GG 000000 BB 000000
+            #     #  1-bit:
+            #     #    RGB -> R 0000000 G 0000000 B 000000
+            #     out = []
+            #     if lti.bits == 4:
+            #         masks = ((240, 0),
+            #                  (15, 4))
+            #     elif lti.bits == 2:
+            #         masks = ((192, 0),
+            #                  (48, 2),
+            #                  (12, 4),
+            #                  (3, 6))
+            #     else:
+            #         masks = ((128, 0),
+            #                  (64, 1),
+            #                  (32, 2),
+            #                  (16, 3),
+            #                  (8, 4),
+            #                  (4, 5),
+            #                  (2, 6),
+            #                  (1, 7))
+            #     sample_ix = 0
+            #     col = 0
+            #     if array.array('H', 0).itemsize != 1:
+            #         out = [None] * lti.size[1]
+            #     else:
+            #         out = array.array('B', 0) * (lti.size[0] * lti.size[1])
+            #     for byte in map(ord, image_data):
+            #         for mask, shift in masks:
+            #             if col < lti.size[1]:
+            #                 out[sample_ix] = (byte & mask) << shift
+            #                 sample_ix += 1
+            #                 col += 1
+            #             else:
+            #                 # PDF image data must be 0-padded to be byte-aligned by row,
+            #                 col = 0
+            #                 break
+            #     raw_mode = 8
+            #     if isinstance(out, array.array)
+            #         image_data = out.tostring()
+            #     else:
+            #         image_data = b"".join(map(chr, out))
+            #     del out
+            else:
+                raise pdfminer.pdftypes.PDFNotImplementedError(
+                    "RGB images with %d-bit samples are not supported" % lti.bits)
+        elif colorspace in ('CalGray', 'DeviceGray'):
+            mode = 'L'
+            samples = 1
+            if lti.bits == 1:
+                mode = rawmode = "1"
+            elif lti.bits == 2:
+                rawmode = "L;2"
+            elif lti.bits == 4:
+                rawmode = "L;4"
+            elif lti.bits == 8:
+                rawmode = "L"
+            elif lti.bits == 16:
+                rawmode = "L;16"
+        elif colorspace in ('DeviceCMYK', 'CMYK'):
+            if lti.bits != 8:
+                raise pdfminer.pdftypes.PDFNotImplementedError(
+                    "PIL only supports 8-bit CMYK")
+            # TODO: Upcast the 1/2/4 bit image to 8 bits.
+            # Can PIL handle 16-bit CMYK?
             mode = "CMYK"
+            rawmode = "CMYK"
+            samples = 4
         else:
             raise pdfminer.pdftypes.PDFNotImplementedError(
-                "Colorspace %r is not supported" % lti.colorspace)
-
-        image = PIL.Image.frombytes(mode, lti.srcsize, image_data, "bit",
-                                    lti.bits, 8, 0, 1)
-        # Explanation of the weird args:
-        #   8: The PDF spec mandates that "each row of sample data must begin
-        #      on a bytes boundary. If the number of data bits per row is not
-        #      a multiple of 8, the end of the row is padded with extra bits
-        #      to fill out the last byte." (p. 336 of PDF 1.7)
-        #   0: Per the PDF spec: "Sample data is represented as a stream of
-        #      bytes, interpreted as 8-bit unsigned integers in the range 0
-        #      to 255. The bytes constitute a continuous bit stream, with the
-        #      high-order bit of each byte first." Per the Pillow docs fill=0
-        #      means, "Add bytes to the LSB end of the decoder buffer; store
-        #      pixels from the MSB end."
-        #   1: 1 means that "the first line in the image is the top line on
-        #      the screen" (Pillow). The PDF spec (p. 337-338) mandates that
-        #      the top line come first.
-        if lti.bits == 1:
-            # The mapping will not have any effect
-            return image
-        decode_array = pdfminer.pdftypes.resolve1(self.obj['Decode'])
-        top = 2 ** lti.bits
-        lookup = []
-        for d_min, d_max in zip(decode_array[::2], decode_array[1::2]):
-            lookup.extend(int((d_min + x * (d_max - d_min) / (top - 1)) * top)
-                          for x in xrange(top))
-        return image.points(lookup)
+                "Colorspace %r is not supported" % colorspace)
+        # The PDF spec requires each row of data to be 0-padded to be at a
+        # byte boundary. stride is the distance in bytes between consecutive
+        # rows of image data.
+        stride = (lti.srcsize[0] * lti.bits * samples + 7) // 8
+        image = PIL.Image.frombytes(mode, lti.srcsize, image_data, "raw",
+                                    rawmode, stride, 1)
+        return image
+        # TODO: implement Decode array
+        # TODO: implement image mask
 
 
 class Lettering(unicode, GraphicsObject):
