@@ -390,7 +390,7 @@ class Page(object):
         self.height = (m_page.mediabox[3] - m_page.mediabox[1]) * unit
         if m_page.rotate in (90, 270):
             self.height, self.width = self.width, self.height
-        self.crop_box = self.adjust_box(m_page.cropbox, m_page.rotate, unit)
+        self.crop_box = self.adjust_box(m_page.cropbox)
         try:
             self.bleed_box = self.adjust_box(
                 pdfminer.pdftypes.resolve1(m_page.attrs['BleedBox']))
