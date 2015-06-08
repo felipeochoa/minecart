@@ -11,6 +11,6 @@ install:
 
 bundler_args: --retry 3
 
-script: "coverage run -m unittest discover tests"
-
-after_success:  coveralls
+script:
+  - coverage run -m unittest discover tests
+  - coveralls
