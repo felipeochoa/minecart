@@ -1,0 +1,4 @@
+mock==1.0.1
+pdfminer==20140328
+Pillow==2.8.1
+six==1.9.0
