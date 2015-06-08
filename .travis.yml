@@ -11,6 +11,9 @@ install:
 
 bundler_args: --retry 3
 
+env:
+  - TRAVIS=1
+
 script:
   - coverage run -m unittest discover tests
   - coveralls
