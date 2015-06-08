@@ -3,7 +3,7 @@ minecart: A Pythonic interface to PDF documents
 ===============================================
 
 ![Travis CI build status (Linux)](https://travis-ci.org/felipeochoa/minecart.svg?branch=master)
-![Coverage Status](https://coveralls.io/repos/felipeochoa/minecart/badge.svg)(https://coveralls.io/r/felipeochoa/minecart)
+[![Coverage Status](https://coveralls.io/repos/felipeochoa/minecart/badge.svg)](https://coveralls.io/r/felipeochoa/minecart)
 
 `minecart` is a Python package that simplifies the extraction of text,
 images, and shapes from a PDF document. It depends on
