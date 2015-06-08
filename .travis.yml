@@ -6,7 +6,6 @@ python:
 install:
   - pip install --upgrade pip
   - pip install -e .[PIL]
-  - python setup.py install
   - pip install coveralls
 
 bundler_args: --retry 3
