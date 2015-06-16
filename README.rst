@@ -24,7 +24,7 @@ detailed information:
 Installation
 ------------
 
-Currently only Python 2.7 is supported. Plans for supporting 3.4+ (using
+Currently only Python 2.7 is supported. 3.4+ support (using
 |pdfminer.six|_) is planned.
 
 1. The easy way: ``pip instal minecart``
