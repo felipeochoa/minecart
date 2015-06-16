@@ -288,8 +288,8 @@ class TkPage(ScrollingCanvas):
         if filled:
             drawer = self.create_polygon
             args = {'fill': "#%02X%02X%02X" %
-                    tuple(int(255 * c + .5) for c in
-                          shape.fill.color.as_rgb())}
+                        tuple(int(255 * c + .5) for c in
+                              shape.fill.color.as_rgb())}
         else:
             drawer = self.create_line
             args = {}
