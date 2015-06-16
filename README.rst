@@ -34,8 +34,8 @@ Currently only Python 2.7 is supported. Plans for supporting 3.4+ (using
 **For CJK languages**: Supporting the CJK languages requires an
 addtional step, as detailed `in pdfminer`_.
 
-Currently supported features
-----------------------------
+Features
+--------
 
 -  *Shapes*: You can extract path information, bounding box, stroke
    parameters, and stroke/fill colors. Color support is fairly robust,
