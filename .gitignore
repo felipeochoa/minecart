@@ -1,0 +1,7 @@
+*.pyc
+*.egg-info/
+build/
+dist/
+.coverage
+# The following cannot be distributed:
+tests/testdocs/orientation.pdf
