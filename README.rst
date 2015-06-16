@@ -7,8 +7,8 @@ minecart: A Pythonic interface to PDF documents
 images, and shapes from a PDF document. It provides a very Pythonic
 interface to extract positioning, color, and font metadata for all of
 the objects in the PDF. It is a pure-Python package (it depends on
-`pdfminer`_ for the low-level parsing). ``minecart`` takes
-inspiration from Tim McNamara’s `slate`_ , but aims to provide more
+|pdfminer|_ for the low-level parsing). ``minecart`` takes
+inspiration from Tim McNamara’s |slate|_, but aims to provide more
 detailed information:
 
 .. code:: python
@@ -25,14 +25,14 @@ Installation
 ------------
 
 Currently only Python 2.7 is supported. Plans for supporting 3.4+ (using
-`pdfminer.six`_) is planned.
+|pdfminer.six|_) is planned.
 
 1. The easy way: ``pip instal minecart``
 2. The hard way: download the source code, change into the working
    directory, and run ``python setup.py install``
 
 **For CJK languages**: Supporting the CJK languages requires an
-addtional step, as detailed `in pdfminer`_.
+addtional step, as detailed_ in |pdfminer|.
 
 Features
 --------
@@ -109,12 +109,15 @@ If you’d like to contribute code, you can either create an issue and
 include a patch (if the changes are small) or fork the project and
 create a pull request.
 
-.. _`create a new issue`: https://github.com/felipeochoa/minecart/issues/new
+.. _create a new issue: https://github.com/felipeochoa/minecart/issues/new
 .. _pdfminer: https://github.com/euske/pdfminer
-.. _`in pdfminer`: https://github.com/euske/pdfminer#for-cjk-languages
 .. _slate: https://github.com/timClicks/slate
 .. _pdfminer.six: https://github.com/goulu/pdfminer
+.. _detailed: https://github.com/euske/pdfminer#for-cjk-languages
 .. |Travis CI build status (Linux)| image:: https://travis-ci.org/felipeochoa/minecart.svg?branch=master
    :target: https://travis-ci.org/felipeochoa/minecart
 .. |Coverage Status| image:: https://coveralls.io/repos/felipeochoa/minecart/badge.svg
    :target: https://coveralls.io/r/felipeochoa/minecart
+.. |pdfminer| replace:: ``pdfminer``
+.. |slate| replace:: ``slate``
+.. |pdfminer.six| replace:: ``pdfminer.six``
