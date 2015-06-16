@@ -96,6 +96,14 @@ through the source or use ``dir`` and ``help`` to see what methods are
 available. Most of the public interface is implemented in the
 ``content`` class, and ``miner`` has more of the PDF nitty-gritty stuff.
 
+Support
+-------
+
+If you are having trouble working with ``minecart``, let us know. We
+have a Google group located at:
+https://groups.google.com/forum/#!forum/minecart, or you can email
+|contact email|_ directly.
+
 Contributing
 ------------
 
@@ -119,6 +127,7 @@ This project is licensed under the MIT license.
 .. _slate: https://github.com/timClicks/slate
 .. _pdfminer.six: https://github.com/goulu/pdfminer
 .. _detailed: https://github.com/euske/pdfminer#for-cjk-languages
+.. _contact email: mailto:minecart@googlegroups.com
 .. |Travis CI build status (Linux)| image:: https://travis-ci.org/felipeochoa/minecart.svg?branch=master
    :target: https://travis-ci.org/felipeochoa/minecart
 .. |Coverage Status| image:: https://coveralls.io/repos/felipeochoa/minecart/badge.svg
@@ -126,3 +135,4 @@ This project is licensed under the MIT license.
 .. |pdfminer| replace:: ``pdfminer``
 .. |slate| replace:: ``slate``
 .. |pdfminer.six| replace:: ``pdfminer.six``
+.. |contact email| replace:: minecart@googlegroups.com
