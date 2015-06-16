@@ -1,7 +1,7 @@
 from os import path
 from setuptools import setup
 
-README = path.join(path.basedir(path.abspath(__file__), "README.md"))
+README = path.join(path.dirname(path.abspath(__file__)), "README.md")
 
 setup(
     name="minecart",
