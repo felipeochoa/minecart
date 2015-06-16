@@ -5,7 +5,7 @@ README = path.join(path.basedir(path.abspath(__file__), "README.md"))
 
 setup(
     name="minecart",
-    version="0.1",
+    version="0.2",
     description=("Simple, Pythonic extraction of images, text, and shapes "
                  "from PDFs"),
     long_description=open(README).read(),
@@ -14,7 +14,7 @@ setup(
     url="https://github.com/felipeochoa/minecart",
     license="MIT",
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
