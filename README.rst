@@ -77,17 +77,19 @@ attributes:
    the page as ``Shape`` objects. ``Shape`` objects have three main
    attributes of interest:
 
--  ``stroke``: An object containing the stroke parameters used to draw
-   the shape. ``.stroke`` has ``.color``, ``.linewidth``, ``.linecap``,
-   ``.linejoin``, ``.miterlimit``, and ``.dash`` attributes. If the
-   shape was not stroked, ``.stroke`` will be ``None``.
+   - ``stroke``: An object containing the stroke parameters used to
+     draw the shape. ``.stroke`` has ``.color``, ``.linewidth``,
+     ``.linecap``, ``.linejoin``, ``.miterlimit``, and ``.dash``
+     attributes. If the shape was not stroked, ``.stroke`` will be
+     ``None``.
 
--  ``.fill``: An object containing the fill parameters used to draw the
-   shape. Right now, ``.fill`` only has a ``.color``\ parameter.
+   - ``.fill``: An object containing the fill parameters used to draw
+     the shape. Right now, ``.fill`` only has a ``.color``\ parameter.
 
--  ``.path``: A list with the coordinates used to defined the shape, as
-   well as the type of line segment each set of coordinates defines.
-   Refer to the ``minecart.Shape`` documentation for more details
+   - ``.path``: A list with the coordinates used to defined the shape,
+     as well as the type of line segment each set of coordinates
+     defines.  Refer to the ``minecart.Shape`` documentation for more
+     details
 
 I try to keep docstrings complete and up to date, so you can read
 through the source or use ``dir`` and ``help`` to see what methods are
