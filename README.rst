@@ -109,6 +109,11 @@ If you’d like to contribute code, you can either create an issue and
 include a patch (if the changes are small) or fork the project and
 create a pull request.
 
+License
+-------
+
+This project is licensed under the MIT license.
+
 .. _create a new issue: https://github.com/felipeochoa/minecart/issues/new
 .. _pdfminer: https://github.com/euske/pdfminer
 .. _slate: https://github.com/timClicks/slate
