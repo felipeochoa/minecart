@@ -148,7 +148,7 @@ class Shape(GraphicsObject):
     `evenodd` -- A boolean indicating whether to use the Even/Odd rule to
                  determine the path interior. If False, the Winding Number
                  Rule is used instead.
-    `path` -- A sequence of path triples (type, *coords), where type is one of
+    `path` -- A sequence of path tuples (type, *coords), where type is one of
 
               - m: Moveto
               - l: Lineto
