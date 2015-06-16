@@ -37,16 +37,16 @@ addtional step, as detailed `in pdfminer`_.
 Features
 --------
 
--  *Shapes*: You can extract path information, bounding box, stroke
+-  **Shapes**: You can extract path information, bounding box, stroke
    parameters, and stroke/fill colors. Color support is fairly robust,
    allowing the simple ``.as_rgb()`` in most cases. (To be concrete,
    ``minecart`` supports the ``DeviceRGB``, ``DeviceCMYK``,
    ``DeviceGray``, and ``CIE-based`` color spaces. ``Indexed`` colors
    are supported if they index into one of the above.)
--  *Images*: ``minecart`` can easily extract images to ``PIL.Image``
+-  **Images**: ``minecart`` can easily extract images to ``PIL.Image``
    objects.
--  *Text*: (Called ``Lettering`` in the source) In addition to
-   extracting plain text from the PDF, you have access to
+-  **Text**: (Called ``Lettering`` in the source) In addition to
+   extracting plain text from the PDF, you can access the
    position/bounding box information and the font used.
 
 If there’s a feature you’d like to extract from a PDF that’s not
