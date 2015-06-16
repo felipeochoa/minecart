@@ -1,10 +1,14 @@
+from os import path
 from setuptools import setup
+
+README = path.join(path.basedir(path.abspath(__file__), "README.md"))
 
 setup(
     name="minecart",
     version="0.1",
-    description=("Simple, Pythonic extraction of text, shapes, and images "
+    description=("Simple, Pythonic extraction of images, text, and shapes "
                  "from PDFs"),
+    long_description=open(README).read(),
     author="Felipe Ochoa",
     author_email="find me through Github",
     url="https://github.com/felipeochoa/minecart",
