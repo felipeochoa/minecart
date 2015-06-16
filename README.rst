@@ -95,7 +95,7 @@ available. Most of the public interface is implemented in the
 ``content`` class, and ``miner`` has more of the PDF nitty-gritty stuff.
 
 Contributing
-============
+------------
 
 Bug reports are always welcome (using the GitHub tracker) as are feature
 requests. The PDF spec has so many corners, it is hard for me to
