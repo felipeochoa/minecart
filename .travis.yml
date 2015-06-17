@@ -15,4 +15,9 @@ env:
 
 script:
   - coverage run --source minecart -m unittest discover tests
+
+after_success:
+  - coveralls
+
+after_failure:
   - coveralls
