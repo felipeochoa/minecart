@@ -91,10 +91,17 @@ attributes:
      defines.  Refer to the ``minecart.Shape`` documentation for more
      details
 
+**Note on color**: The PDF spec spends a fair amount of time dealing
+with color specifications, defining color spaces, and transforms and
+the like. ``minecart``'s approach is to simplify things down with sensible
+defaults, so that every color has an ``.as_rgb()`` method, which returns
+a 3-tuple with component values between 0 (black) and 1 (white). If you
+are interested in extracting colorspace families and parameters, you can
+do that too, though! 
+
 I try to keep docstrings complete and up to date, so you can read
 through the source or use ``dir`` and ``help`` to see what methods are
-available. Most of the public interface is implemented in the
-``content`` class, and ``miner`` has more of the PDF nitty-gritty stuff.
+available. 
 
 Support
 -------
