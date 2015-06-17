@@ -24,7 +24,7 @@ detailed information:
 Installation
 ------------
 
-Currently only Python 2.7 is supported. Plans for supporting 3.4+ (using
+Currently only Python 2.7 is supported. 3.4+ support (using
 |pdfminer.six|_) is planned.
 
 1. The easy way: ``pip instal minecart``
@@ -60,7 +60,7 @@ Documentation
 The main entry point will always be ``minecart.Document``, which accepts
 a single parameter, an open file-like object which will be read to
 create the document. The ``Document`` has two primary methods for
-accessing its contents: ``.get_page(num)`` and ``iter_pages()``. Both
+accessing its contents: ``.get_page(num)`` and ``.iter_pages()``. Both
 methods return ``minecart.Page`` objects, which provide access to the
 graphical elements found on the page. ``Page`` objects have three main
 attributes:
@@ -77,7 +77,7 @@ attributes:
    the page as ``Shape`` objects. ``Shape`` objects have three main
    attributes of interest:
 
-   - ``stroke``: An object containing the stroke parameters used to
+   - ``.stroke``: An object containing the stroke parameters used to
      draw the shape. ``.stroke`` has ``.color``, ``.linewidth``,
      ``.linecap``, ``.linejoin``, ``.miterlimit``, and ``.dash``
      attributes. If the shape was not stroked, ``.stroke`` will be
@@ -91,7 +91,7 @@ attributes:
      defines.  Refer to the ``minecart.Shape`` documentation for more
      details
 
-I try to keep docstrings complete and up to date, so you can read
+We try to keep docstrings complete and up to date, so you can read
 through the source or use ``dir`` and ``help`` to see what methods are
 available. Most of the public interface is implemented in the
 ``content`` class, and ``miner`` has more of the PDF nitty-gritty stuff.
@@ -108,8 +108,8 @@ Contributing
 ------------
 
 Bug reports are always welcome (using the GitHub tracker) as are feature
-requests. The PDF spec has so many corners, it is hard for me to
-prioritize implementing access to its various features. If there’s
+requests. The PDF spec has so many corners, it is hard to
+prioritize which features to implement. If there’s
 something you’d like to extract from a document but isn’t currently
 supported, please `create a new issue`_.
 
