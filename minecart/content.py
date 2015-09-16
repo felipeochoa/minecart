@@ -58,13 +58,13 @@ class GraphicsObject(object):
                 and right <= bbox[2]
                 and top <= bbox[3])
 
-    @propery
+    @property
     def width(self):
         "Return the width of the bounding box of this object."
         left, right = self.get_bbox()[::2]
         return right - left
 
-    @propery
+    @property
     def height(self):
         "Return the height of the bounding box of this object."
         bottom, top = self.get_bbox()[1::2]
