@@ -511,5 +511,18 @@ class StubColorSpaceFamily(ColorSpaceFamily):
         # colorspace
         return ColorSpace(self, self.ncomponents, (0,) * self.ncomponents)
 
+
 for name, ncomps in [('Pattern', 1), ('Separation', 1)]:
     FAMILIES[name] = StubColorSpaceFamily(name, ncomps)
+
+
+def make_color_space(spec):
+    "Translate a string or list into a ColorSpace class."
+    spec = pdfminer.pdftypes.resolve_all(spec)
+    if isinstance(spec, list):
+        name = pdfminer.psparser.literal_name(spec[0])
+        params = spec[1:]
+    else:
+        name = pdfminer.psparser.literal_name(spec)
+        params = []
+    return FAMILIES[name].make_space(params)

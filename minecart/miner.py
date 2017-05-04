@@ -141,14 +141,7 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         # subdictionary." We implement this behavior by overriding any
         # entries in the csmap with this name with the original color spaces.
         for csname, spec in pdfminer.pdftypes.dict_value(spaces).iteritems():
-            spec = pdfminer.pdftypes.resolve_all(spec)
-            if isinstance(spec, list):
-                name = pdfminer.psparser.literal_name(spec[0])
-                params = spec[1:]
-            else:
-                name = pdfminer.psparser.literal_name(spec)
-                params = []
-            self.csmap[csname] = color.FAMILIES[name].make_space(params)
+            self.csmap[csname] = color.make_color_space(spec)
         self.csmap.update(
             (name, color.FAMILIES[name].make_space())
             for name in ('DeviceGray', 'DeviceRGB', 'DeviceCMYK')
