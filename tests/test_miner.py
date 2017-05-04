@@ -35,7 +35,7 @@ class TestStrokeState(unittest.TestCase):
 
     def test_from_gs(self):
         "Ensure StrokeState is created properly from a graphicstate."
-        gs = minecart.miner.ColoredState()  #pylint: disable=C0103
+        gs = minecart.miner.ColoredState()  # pylint: disable=C0103
         gs.linewidth = 3
         gs.linecap = 1
         gs.linejoin = 2
@@ -58,7 +58,7 @@ class TestFillState(unittest.TestCase):
 
     def test_from_gs(self):
         "Ensure FillState is created properly from a graphicstate."
-        gs = minecart.miner.ColoredState()  #pylint: disable=C0103
+        gs = minecart.miner.ColoredState()  # pylint: disable=C0103
         gs.fill_color = color = object()
         fill = minecart.miner.FillState.from_gs(gs)
         self.assertIsInstance(fill, minecart.miner.FillState)
@@ -115,7 +115,7 @@ class TestColoredInterpreter(unittest.TestCase):
 
 class TestColoredInterpreterGraphics(unittest.TestCase):
 
-    #pylint: disable=C0103
+    # pylint: disable=C0103
 
     "Test the graphics commands on the ColoredInterpreter."
 
