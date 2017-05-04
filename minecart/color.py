@@ -31,7 +31,7 @@ TODO:
   to convert the color into the `Device`'s color space. (`Device` would
   control gamma-correction). `.as_rgb()` would use a default RGB-device to
   convert the color into 'DeviceRGB' space
-* ICCBased, Pattern, Separation, DeviceN colorspaces
+* Pattern, Separation, DeviceN colorspaces
 
 """
 #pylint: disable=R0903
@@ -531,6 +531,8 @@ class ICCSpace(ColorSpace):
         "Use the alternate color's implementation."
         return self.alternate.make_color(value)
 
+
+FAMILIES['ICCBased'] = ColorSpaceFamily('ICCBased', ICCSpace)
 
 ############################################################################
 #             Stub implementations Pattern, Separation                     #
