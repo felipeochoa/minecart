@@ -106,10 +106,8 @@ available.
 Support
 -------
 
-If you are having trouble working with ``minecart``, let us know. We
-have a Google group located at:
-https://groups.google.com/forum/#!forum/minecart, or you can email
-|contact email|_ directly.
+If you are having trouble working with ``minecart``, feel free to create
+a new issue.
 
 Contributing
 ------------
@@ -134,7 +132,6 @@ This project is licensed under the MIT license.
 .. _slate: https://github.com/timClicks/slate
 .. _pdfminer.six: https://github.com/goulu/pdfminer
 .. _detailed: https://github.com/euske/pdfminer#for-cjk-languages
-.. _contact email: mailto:minecart@googlegroups.com
 .. |Travis CI build status (Linux)| image:: https://travis-ci.org/felipeochoa/minecart.svg?branch=master
    :target: https://travis-ci.org/felipeochoa/minecart
 .. |Coverage Status| image:: https://coveralls.io/repos/felipeochoa/minecart/badge.svg
