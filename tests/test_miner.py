@@ -21,11 +21,11 @@ def _patched_callable(obj):
     if getattr(obj, '__call__', None) is not None:
         return True
     if (isinstance(obj, (staticmethod, classmethod)) and
-        mock._callable(obj.__func__)):  #pylint: disable=W0212
+        mock.mock._callable(obj.__func__)):  #pylint: disable=W0212
         return True
     return False
 
-mock._callable = _patched_callable  #pylint: disable=W0212
+mock.mock._callable = _patched_callable  #pylint: disable=W0212
 
 
 class TestStrokeState(unittest.TestCase):
