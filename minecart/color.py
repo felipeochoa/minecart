@@ -211,6 +211,7 @@ class DeviceSpace(ColorSpace):
             1.0 - min(1, yellow + black)
         )
 
+
 DEVICE_GRAY = DeviceFamily('DeviceGray', (0,)).make_space()
 DEVICE_RGB = DeviceFamily('DeviceRGB', (0, 0, 0)).make_space()
 DEVICE_CMYK = DeviceFamily('DeviceCMYK', (0, 0, 0, 1)).make_space()
@@ -535,10 +536,10 @@ class ICCSpace(ColorSpace):
 #             Stub implementations Pattern, Separation                     #
 ############################################################################
 
+
 class StubColorSpaceFamily(ColorSpaceFamily):
 
     "A stub implementation with only a number of components."
-
 
     def __init__(self, name, ncomponents):
         super(StubColorSpaceFamily, self).__init__(name, None)
