@@ -493,8 +493,46 @@ class IndexedSpace(ColorSpace):
 
 FAMILIES['Indexed'] = ColorSpaceFamily('Indexed', IndexedSpace)
 
+
+class ICCSpace(ColorSpace):
+
+    "A simple implementation of ICC colors using the alternate color space."
+
+    # From the spec (v1.7; Section 4.5 p.253):
+    # > An alternate color space to be used in case the one specified
+    # > in the stream data is not supported (for example, by
+    # > applications designed for earlier versions of PDF). The
+    # > alternate space may be any valid color space (except a Pattern
+    # > color space) that has the number of components specified by
+    # > N. If this entry is omitted and the application does not
+    # > understand the ICC profile data, the color space used is
+    # > DeviceGray, DeviceRGB, or DeviceCMYK, depending on whether
+    # > the value of N is 1, 3, or 4, respectively
+
+    def __init__(self, family, params):
+        super(ICCSpace, self).__init__(family, params)
+        stream = params[0]
+        self.n = stream['N']
+        alternate = stream.get('Alternate')
+        if alternate is None:
+            if self.n == 1:
+                self.alternate = DEVICE_GRAY
+            elif self.n == 3:
+                self.alternate = DEVICE_RGB
+            elif self.n == 4:
+                self.alternate = DEVICE_CMYK
+            else:
+                raise ValueError('ICC space must have 1, 3 or 4 componnents')
+        else:
+            self.alternate = make_color_space(alternate)
+
+    def make_color(self, value=None):
+        "Use the alternate color's implementation."
+        return self.alternate.make_color(value)
+
+
 ############################################################################
-#      Stub implementations ICCBased, Pattern, Separation, and DeviceN     #
+#             Stub implementations Pattern, Separation                     #
 ############################################################################
 
 class StubColorSpaceFamily(ColorSpaceFamily):

@@ -2,6 +2,7 @@
 
 import unittest
 import mock
+import pdfminer
 
 import minecart.color
 
@@ -277,3 +278,67 @@ class TestCIESpace(unittest.TestCase):
         space = minecart.color.CIESpace(family,
                                         [{'WhitePoint': (.01, 1, .01)}])
         self.assertIsInstance(space.make_color([1]), minecart.color.CIEColor)
+
+
+class TestICCSpace(unittest.TestCase):
+
+    def test_no_alternate_n1(self):
+        family = minecart.color.ColorSpaceFamily(
+            'ICCBased', minecart.color.ICCSpace
+        )
+        attrs = {'N': 1}
+        stream = pdfminer.pdftypes.PDFStream(attrs, b'')
+        space = family.make_space([stream])
+        self.assertIs(space.alternate, minecart.color.DEVICE_GRAY)
+        color = space.make_color((.25,))
+        self.assertEqual(color.as_rgb(), (.25, .25, .25))
+
+    def test_no_alternate_n3(self):
+        family = minecart.color.ColorSpaceFamily(
+            'ICCBased', minecart.color.ICCSpace
+        )
+        attrs = {'N': 3}
+        stream = pdfminer.pdftypes.PDFStream(attrs, b'')
+        space = family.make_space([stream])
+        self.assertIs(space.alternate, minecart.color.DEVICE_RGB)
+        color = space.make_color((.25, .25, .25))
+        self.assertEqual(color.as_rgb(), (.25, .25, .25))
+
+    def test_no_alternate_n4(self):
+        family = minecart.color.ColorSpaceFamily(
+            'ICCBased', minecart.color.ICCSpace
+        )
+        attrs = {'N': 4}
+        stream = pdfminer.pdftypes.PDFStream(attrs, b'')
+        space = family.make_space([stream])
+        self.assertIs(space.alternate, minecart.color.DEVICE_CMYK)
+        color = space.make_color((.25, .25, .25, 0))
+        self.assertEqual(color.as_rgb(), (.75, .75, .75))
+
+    def test_alternate_n1(self):
+        family = minecart.color.ColorSpaceFamily(
+            'ICCBased', minecart.color.ICCSpace
+        )
+        attrs = {
+            'N': 1,
+            'Alternate': ['CalGray', {'WhitePoint': (.5, 1, .5)}]
+        }
+        stream = pdfminer.pdftypes.PDFStream(attrs, b'')
+        space = family.make_space([stream])
+        self.assertEqual(space.alternate.family.name, 'CalGray')
+        color = space.make_color((.25,))
+        self.assertIsInstance(color, minecart.color.CIEColor)
+
+    def test_alternate_n3(self):
+        family = minecart.color.ColorSpaceFamily(
+            'ICCBased', minecart.color.ICCSpace
+        )
+        attrs = {
+            'N': 3,
+            'Alternate': ['CalRGB', {'WhitePoint': (.5, 1, .5)}]
+        }
+        stream = pdfminer.pdftypes.PDFStream(attrs, b'')
+        space = family.make_space([stream])
+        self.assertEqual(space.alternate.family.name, 'CalRGB')
+        color = space.make_color((.25,))
+        self.assertIsInstance(color, minecart.color.CIEColor)
