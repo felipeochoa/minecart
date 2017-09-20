@@ -511,7 +511,6 @@ class ICCSpace(ColorSpace):
     # > the value of N is 1, 3, or 4, respectively
 
     def __init__(self, family, params):
-        super(ICCSpace, self).__init__(family, params)
         stream = params[0]
         self.n = stream['N']
         alternate = stream.get('Alternate')
@@ -526,6 +525,7 @@ class ICCSpace(ColorSpace):
                 raise ValueError('ICC space must have 1, 3 or 4 componnents')
         else:
             self.alternate = make_color_space(alternate)
+        super(ICCSpace, self).__init__(family, self.n)
 
     def make_color(self, value=None):
         "Use the alternate color's implementation."
