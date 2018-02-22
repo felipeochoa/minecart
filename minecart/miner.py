@@ -2,14 +2,15 @@
 This module contains all the classes that interface with pfdminer directly.
 """
 
+import numbers
+
 import pdfminer.layout
 import pdfminer.pdfdevice
-import pdfminer.pdfdocument
 import pdfminer.pdfinterp
-import pdfminer.pdfpage
 import pdfminer.pdfparser
 import pdfminer.pdftypes
 import pdfminer.utils
+import pdfminer.pdfcolor
 
 from .content import Page, Shape, Image, Lettering
 from . import color
@@ -140,7 +141,7 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
         # spaces directly; they never refer to resources in the ColorSpace
         # subdictionary." We implement this behavior by overriding any
         # entries in the csmap with this name with the original color spaces.
-        for csname, spec in pdfminer.pdftypes.dict_value(spaces).iteritems():
+        for csname, spec in pdfminer.pdftypes.dict_value(spaces).items():
             self.csmap[csname] = color.make_color_space(spec)
         self.csmap.update(
             (name, color.FAMILIES[name].make_space())
@@ -158,32 +159,32 @@ class ColoredInterpreter(pdfminer.pdfinterp.PDFPageInterpreter):
 
     # setgray-stroking
     def do_G(self, gray):
-        self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
+        self.do_CS(pdfminer.pdfcolor.LITERAL_DEVICE_GRAY)
         self.graphicstate.stroke_color = self.scs.make_color((gray,))
 
     # setgray-non-stroking
     def do_g(self, gray):
-        self.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
+        self.do_cs(pdfminer.pdfcolor.LITERAL_DEVICE_GRAY)
         self.graphicstate.fill_color = self.ncs.make_color((gray,))
 
     # setrgb-stroking
     def do_RG(self, r, g, b):
-        self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
+        self.do_CS(pdfminer.pdfcolor.LITERAL_DEVICE_RGB)
         self.graphicstate.stroke_color = self.scs.make_color((r, g, b))
 
     # setrgb-non-stroking
     def do_rg(self, r, g, b):
-        self.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
+        self.do_cs(pdfminer.pdfcolor.LITERAL_DEVICE_RGB)
         self.graphicstate.fill_color = self.ncs.make_color((r, g, b))
 
     # setcmyk-stroking
     def do_K(self, c, m, y, k):
-        self.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
+        self.do_CS(pdfminer.pdfcolor.LITERAL_DEVICE_CMYK)
         self.graphicstate.stroke_color = self.scs.make_color((c, m, y, k))
 
     # setcmyk-non-stroking
     def do_k(self, c, m, y, k):
-        self.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
+        self.do_cs(pdfminer.pdfcolor.LITERAL_DEVICE_CMYK)
         self.graphicstate.fill_color = self.ncs.make_color((c, m, y, k))
 
     # setcolor-stroking
@@ -293,7 +294,7 @@ class DeviceLoader(pdfminer.pdfdevice.PDFTextDevice):
         hv = ('horizontal', 'vertical').index(hv)
         needcharspace = False
         for obj in seq:
-            if pdfminer.utils.isnumber(obj):
+            if isinstance(obj, numbers.Number):
                 vec[hv] -= obj * dxscale
                 needcharspace = True
             else:
@@ -326,11 +327,13 @@ class Document(object):
         self.device = DeviceLoader(res_mgr)
         self.interpreter = ColoredInterpreter(res_mgr, self.device)
         self.parser = pdfminer.pdfparser.PDFParser(pdffile)
-        self.doc = pdfminer.pdfdocument.PDFDocument(self.parser, caching=True)
+        self.doc = pdfminer.pdfparser.PDFDocument(caching=True)
+        self.parser.set_document(self.doc)
+        self.doc.set_parser(self.parser)
 
     def iter_pages(self):
         "Iterate through all the pages in a document."
-        for page in pdfminer.pdfpage.PDFPage.create_pages(self.doc):
+        for page in self.doc.get_pages():
             self.interpreter.process_page(page)
             yield self.device.page
 
@@ -342,8 +345,7 @@ class Document(object):
         display order, not the numbering system used in the document.
 
         """
-        for i, page in enumerate(
-                pdfminer.pdfpage.PDFPage.create_pages(self.doc)):
+        for i, page in enumerate(self.doc.get_pages()):
             if i == num:
                 self.interpreter.process_page(page)
                 return self.device.page

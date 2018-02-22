@@ -116,7 +116,7 @@ class Writer(object):
             return str(val)
         elif force_inline and isinstance(val, dict):
             ret = [b"<<"]
-            for key, val2 in val.iteritems():
+            for key, val2 in val.items():
                 if val2 is not None:
                     ret.append(b"\n   /%s %s" % (key,
                                                  self.convert_literal(val2)))

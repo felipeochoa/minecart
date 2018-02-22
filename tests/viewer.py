@@ -13,6 +13,7 @@ import ctypes
 import Tkinter as tkinter
 import tkFont
 import ttk
+import six
 import minecart.content
 import pdfminer.pdftypes
 
@@ -101,14 +102,14 @@ def loadfont(fontpath, private=True, enumerable=False):
     '''
     # This function was taken from digsby:
     # https://github.com/ifwe/digsby/blob/f5fe00244744aa131e07f09348d10563f3d8fa99/digsby/src/gui/native/win/winfonts.py#L15
-    if isinstance(fontpath, str):
+    if isinstance(fontpath, six.binary_type):
         pathbuf = ctypes.create_string_buffer(fontpath)
         AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExA
-    elif isinstance(fontpath, unicode):
+    elif isinstance(fontpath, six.text_type):
         pathbuf = ctypes.create_unicode_buffer(fontpath)
         AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     else:
-        raise TypeError('fontpath must be of type str or unicode')
+        raise TypeError('fontpath must be of type {} or {}'.format(six.binary_type, six.text_type))
     flags = ((FR_PRIVATE if private else 0)
              | (FR_NOT_ENUM if not enumerable else 0))
     return AddFontResourceEx(ctypes.byref(pathbuf), flags, 0)

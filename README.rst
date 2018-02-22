@@ -24,8 +24,7 @@ detailed information:
 Installation
 ------------
 
-Currently only Python 2.7 is supported. 3.4+ support (using
-|pdfminer.six|_) is planned.
+As of version ``0.3.0``, only Python 3 is support, using |pdfminer3k|.
 
 1. The easy way: ``pip install minecart``
 2. The hard way: download the source code, change into the working
@@ -130,7 +129,7 @@ This project is licensed under the MIT license.
 .. _create a new issue: https://github.com/felipeochoa/minecart/issues/new
 .. _pdfminer: https://github.com/euske/pdfminer
 .. _slate: https://github.com/timClicks/slate
-.. _pdfminer.six: https://github.com/goulu/pdfminer
+.. _pdfminer3k: https://github.com/jaepil/pdfminer3k
 .. _detailed: https://github.com/euske/pdfminer#for-cjk-languages
 .. |Travis CI build status (Linux)| image:: https://travis-ci.org/felipeochoa/minecart.svg?branch=master
    :target: https://travis-ci.org/felipeochoa/minecart
@@ -140,5 +139,5 @@ This project is licensed under the MIT license.
    :target: https://requires.io/github/felipeochoa/minecart/requirements/?branch=master
 .. |pdfminer| replace:: ``pdfminer``
 .. |slate| replace:: ``slate``
-.. |pdfminer.six| replace:: ``pdfminer.six``
+.. |pdfminer3k| replace:: ``pdfminer3k``
 .. |contact email| replace:: minecart@googlegroups.com

@@ -24,6 +24,8 @@ import io
 import itertools
 import sys
 
+import six
+
 from pdfminer.psparser import LIT
 JPEG_FILTERS = (LIT('DCTDecode'), LIT('DCT'), LIT('JPXDecode'))
 
@@ -363,21 +365,21 @@ class Image(GraphicsObject):
         # byte boundary. stride is the distance in bytes between consecutive
         # rows of image data.
         stride = (lti.srcsize[0] * lti.bits * samples + 7) // 8
-        image = PIL.Image.frombytes(mode, lti.srcsize, image_data, "raw",
-                                    rawmode, stride, 1)
+        image = PIL.Image.open(io.BytesIO(image_data))
+
         return image
         # TODO: implement Decode array
         # TODO: implement image mask
 
 
-class Lettering(unicode, GraphicsObject):
+class Lettering(six.text_type, GraphicsObject):
 
     """
     A text string on a page, including its typographic information.
     """
 
     def __new__(cls, data, font, bbox, horizontal=True):
-        loc_str = unicode.__new__(cls, data)
+        loc_str = six.text_type.__new__(cls, data)
         x1, y1, x2, y2 = bbox  #pylint: disable=C0103
         loc_str.bbox = (min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2))
         loc_str.horizontal = horizontal

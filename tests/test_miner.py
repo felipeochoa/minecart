@@ -1,12 +1,16 @@
 "Unit tests for the miner module."
 
 import unittest
-import mock
+try:
+    import mock
+except ImportError:
+    import unittest.mock as mock
 import os
 
 import minecart.miner
 import minecart.color
 import pdfminer.pdfdevice
+import pdfminer.pdfcolor
 
 TRAVIS = int(os.getenv("TRAVIS", 0))
 
@@ -177,7 +181,7 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         "Test setting the stroking color."
         # First we test Gray
         pop.return_value = (0.5,)
-        self.interp.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
+        self.interp.do_CS(pdfminer.pdfcolor.LITERAL_DEVICE_GRAY)
         self.interp.do_SCN()
         self.assertIsInstance(self.interp.graphicstate.stroke_color,
                               minecart.color.Color)
@@ -188,7 +192,7 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
 
         # Now we test with RGB
         pop.return_value = (0.5, .25, .125)
-        self.interp.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
+        self.interp.do_CS(pdfminer.pdfcolor.LITERAL_DEVICE_RGB)
         self.interp.do_SCN()
         self.assertIsInstance(self.interp.graphicstate.stroke_color,
                               minecart.color.Color)
@@ -199,7 +203,7 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
 
         # Now we test with CMYK
         pop.return_value = (0.5, .25, .125, .0625)
-        self.interp.do_CS(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
+        self.interp.do_CS(pdfminer.pdfcolor.LITERAL_DEVICE_CMYK)
         self.interp.do_SCN()
         self.assertIsInstance(self.interp.graphicstate.stroke_color,
                               minecart.color.Color)
@@ -212,7 +216,7 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
         "Test setting the fill color."
         # First we test Gray
         pop.return_value = (0.5,)
-        self.interp.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_GRAY)
+        self.interp.do_cs(pdfminer.pdfcolor.LITERAL_DEVICE_GRAY)
         self.interp.do_scn()
         self.assertIsInstance(self.interp.graphicstate.fill_color,
                               minecart.color.Color)
@@ -223,7 +227,7 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
 
         # Now we test with RGB
         pop.return_value = (0.5, .25, .125)
-        self.interp.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_RGB)
+        self.interp.do_cs(pdfminer.pdfcolor.LITERAL_DEVICE_RGB)
         self.interp.do_scn()
         self.assertIsInstance(self.interp.graphicstate.fill_color,
                               minecart.color.Color)
@@ -234,7 +238,7 @@ class TestColoredInterpreterGraphics(unittest.TestCase):
 
         # Now we test with CMYK
         pop.return_value = (0.5, .25, .125, .0625)
-        self.interp.do_cs(pdfminer.pdfinterp.LITERAL_DEVICE_CMYK)
+        self.interp.do_cs(pdfminer.pdfcolor.LITERAL_DEVICE_CMYK)
         self.interp.do_scn()
         self.assertIsInstance(self.interp.graphicstate.fill_color,
                               minecart.color.Color)
@@ -249,7 +253,7 @@ class TestDeviceLoader(unittest.TestCase):
 
     def setUp(self):
         self.device = minecart.miner.DeviceLoader(object())
-        self.device.page = mock.MagicMock(autospec=pdfminer.pdfpage.PDFPage)
+        self.device.page = mock.MagicMock(autospec=pdfminer.pdfparser.PDFPage)
 
     def test_init(self):
         "Test correct initialization of the device state."
@@ -261,7 +265,7 @@ class TestDeviceLoader(unittest.TestCase):
     @mock.patch("minecart.miner.Page", autospec=True)
     def test_begin_page(self, minecart_page):
         "Ensure creation of a new page and updating of `.unit`."
-        page = mock.MagicMock(autospec=pdfminer.pdfpage.PDFPage)
+        page = mock.MagicMock(autospec=pdfminer.pdfparser.PDFPage)
         page.attrs = {'UserUnit': 2}
         self.device.begin_page(page, None)
         minecart_page.assert_called_once_with(page)
@@ -401,13 +405,13 @@ class TestDocument(unittest.TestCase):
 
     "Test the Document class."
 
-    @mock.patch("pdfminer.pdfdocument.PDFDocument", autospec=True)
+    @mock.patch("pdfminer.pdfparser.PDFDocument", autospec=True)
     @mock.patch("pdfminer.pdfparser.PDFParser", autospec=True)
     def test_init(self, pdfparser, pdfdocument):
         "Test correct initializing of the Document object."
         pdffile = object()
         doc = minecart.miner.Document(pdffile)
-        pdfdocument.assert_called_once_with(doc.parser, caching=True)
+        pdfdocument.assert_called_once_with(caching=True)
         pdfparser.assert_called_once_with(pdffile)
 
     @unittest.skipIf(TRAVIS, "Skipping for Travis build")
