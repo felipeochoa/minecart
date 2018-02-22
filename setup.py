@@ -12,6 +12,7 @@ setup(
     author="Felipe Ochoa",
     author_email="find me through Github",
     url="https://github.com/felipeochoa/minecart",
+    download_url='https://github.com/felipeochoa/minecart/tarball/0.3.0',
     license="MIT",
     classifiers=[
         'Development Status :: 4 - Beta',
