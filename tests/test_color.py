@@ -353,12 +353,13 @@ class TestICCSpace(unittest.TestCase):
         # Test file from snoyer/minecart
         pdfpath = os.path.join(os.path.dirname(__file__),
                                'testdocs', 'ai-files-are-pdfs.pdf')
-        doc = minecart.Document(open(pdfpath, 'rb'))
-        page = doc.get_page(0)
-        red = (0.929, 0.11, 0.141)
-        black = (0.137, 0.122, 0.125)
-        blue = (0.18, 0.192, 0.573)
-        self.assertEqual(
-            set(tuple(shape.fill.color.as_rgb()) for shape in page.shapes),
-            {red, black, blue}
-        )
+        with open(pdfpath, 'rb') as f:
+            doc = minecart.Document(f)
+            page = doc.get_page(0)
+            red = (0.929, 0.11, 0.141)
+            black = (0.137, 0.122, 0.125)
+            blue = (0.18, 0.192, 0.573)
+            self.assertEqual(
+                set(tuple(shape.fill.color.as_rgb()) for shape in page.shapes),
+                {red, black, blue}
+            )
